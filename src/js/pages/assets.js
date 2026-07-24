@@ -381,12 +381,15 @@ function _showAssetDetail(asset) {
       points.push({ ts: h.ts, value: h.breakdown[asset.id] });
     }
   });
-  points.sort((a, b) => b.ts.localeCompare(a.ts));
+  // Sort ascending first, then reverse for descending (latest first).
+  // Using slice().reverse() avoids mutating the shared reference.
+  points.sort((a, b) => a.ts.localeCompare(b.ts));
+  const reversed = points.slice().reverse();
 
   document.getElementById('assetDetailTitle').textContent = `${asset.name} · 历史数据`;
   const listEl = document.getElementById('assetDetailList');
-  listEl.innerHTML = points.length
-    ? points.map(p => `
+  listEl.innerHTML = reversed.length
+    ? reversed.map(p => `
       <div class="asset-detail-row" data-ts="${esc(p.ts)}" data-value="${p.value}">
         <div class="adr-date">${fmtDateShort(p.ts)}</div>
         <div class="adr-value">¥${fmt(p.value)}</div>
