@@ -7769,7 +7769,7 @@ function _renderDistribution(assets) {
   }
   const cats = {};
   assets.forEach((a) => {
-    cats[a.category] = (cats[a.category] || 0) + a.value;
+    cats[a.category] = (cats[a.category] || 0) + (Number(a.value) || 0);
   });
   buildDoughnut("assetPieChart", Object.keys(cats), Object.values(cats), "assetLegend");
   buildHorizBar("assetBarChart", Object.keys(cats), Object.values(cats));
@@ -7908,7 +7908,7 @@ function _showAssetDetail(asset) {
       points.push({ ts: h.ts, value: h.breakdown[asset.id] });
     }
   });
-  points.sort((a, b) => a.ts.localeCompare(b.ts));
+  points.sort((a, b) => b.ts.localeCompare(a.ts));
   document.getElementById("assetDetailTitle").textContent = `${asset.name} \xB7 \u5386\u53F2\u6570\u636E`;
   const listEl = document.getElementById("assetDetailList");
   listEl.innerHTML = points.length ? points.map((p) => `
