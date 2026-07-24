@@ -49,7 +49,7 @@ export function formatTxDateTime(dateStr) {
 export function fmtDateShort(iso) {
   const d = new Date(iso);
   if (isNaN(d)) return '';
-  return `${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 
 /** Current moment as "YYYY-MM-DDTHH:mm:ss" for <input type=datetime-local>. */
