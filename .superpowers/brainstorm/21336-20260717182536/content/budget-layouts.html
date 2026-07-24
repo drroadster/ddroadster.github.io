@@ -1,0 +1,142 @@
+<h2>Which budget layout is most intuitive?</h2>
+<p class="subtitle">Three approaches for showing budget usage across categories</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>分类卡片式</h3>
+      <p>每张卡片同时展示月/周/日三重进度，子分类缩进</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-body" style="padding:16px;font-family:system-ui,sans-serif;font-size:13px;background:#0a0a1a;color:#e0e0e0;border-radius:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-weight:700;font-size:15px">预算管理</span>
+            <span style="color:#4fc3f7">+ 新增</span>
+          </div>
+          <!-- Card 1 -->
+          <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <span>🍜 餐饮</span>
+              <span style="color:#888">编辑</span>
+            </div>
+            <div style="margin-bottom:6px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:2px"><span>本月</span><span>¥1,950 / ¥3,000 · 65%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow:hidden"><div style="height:100%;width:65%;background:linear-gradient(90deg,#4fc3f7,#29b6f6);border-radius:3px"></div></div>
+            </div>
+            <div style="margin-bottom:6px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:2px"><span>本周</span><span>¥480 / ¥750 · 64%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow-hidden"><div style="height:100%;width:64%;background:linear-gradient(90deg,#81c784,#66bb6a);border-radius:3px"></div></div>
+            </div>
+            <div style="margin-bottom:4px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:2px"><span>今日</span><span>¥40 / ¥100 · 40%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow-hidden"><div style="height:100%;width:40%;background:linear-gradient(90deg,#ffb74d,#ffa726);border-radius:3px"></div></div>
+            </div>
+            <div style="margin-top:6px;padding-top:6px;border-top:1px solid rgba(255,255,255,0.06);font-size:12px">
+              <div style="display:flex;justify-content:space-between;color:#aaa">
+                <span style="padding-left:12px">├ 午餐</span>
+                <span>¥400 / ¥1,000 · 40%</span>
+              </div>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid rgba(255,255,255,0.08)">
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+              <span>💰 购物</span>
+              <span style="color:#888">编辑</span>
+            </div>
+            <div style="margin-bottom:6px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:2px"><span>本月</span><span>¥2,000 / ¥4,000 · 50%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow-hidden"><div style="height:100%;width:50%;background:linear-gradient(90deg,#4fc3f7,#29b6f6);border-radius:3px"></div></div>
+            </div>
+            <div style="margin-bottom:4px">
+              <div style="display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:2px"><span>今日</span><span style="color:#ef5350">¥600 / ¥200 · 300%</span></div>
+              <div style="height:6px;background:rgba(255,255,255,0.1);border-radius:3px;overflow-hidden"><div style="height:100%;width:100%;background:#ef5350;border-radius:3px"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>环形图 + 列表</h3>
+      <p>顶部总览环形图，下面列表按周期筛选</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-body" style="padding:16px;font-family:system-ui,sans-serif;font-size:13px;background:#0a0a1a;color:#e0e0e0;border-radius:12px">
+          <!-- Ring chart area -->
+          <div style="text-align:center;margin-bottom:16px">
+            <div style="font-weight:700;font-size:15px;margin-bottom:8px">本月预算</div>
+            <div style="position:relative;width:120px;height:120px;margin:0 auto;border-radius:50%;background:conic-gradient(#4fc3f7 0% 65%, rgba(255,255,255,0.08) 65% 100%);display:flex;align-items:center;justify-content:center">
+              <div style="width:80px;height:80px;border-radius:50%;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                <span style="font-size:18px;font-weight:700">65%</span>
+                <span style="font-size:11px;color:#aaa">¥3,950 / ¥6,000</span>
+              </div>
+            </div>
+          </div>
+          <!-- Tab switcher -->
+          <div style="display:flex;gap:4px;margin-bottom:12px;background:rgba(255,255,255,0.05);border-radius:8px;padding:3px">
+            <div style="flex:1;text-align:center;padding:6px;border-radius:6px;background:#4fc3f7;color:#000;font-weight:600;font-size:12px">月</div>
+            <div style="flex:1;text-align:center;padding:6px;border-radius:6px;font-size:12px;color:#aaa">周</div>
+            <div style="flex:1;text-align:center;padding:6px;border-radius:6px;font-size:12px;color:#aaa">日</div>
+          </div>
+          <!-- List -->
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+            <span>🍜 餐饮</span><span>¥1,950 / ¥3,000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);padding-left:16px;font-size:12px;color:#aaa">
+            <span>　午餐</span><span>¥400 / ¥1,000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+            <span>💰 购物</span><span style="color:#ef5350">¥2,000 / ¥4,000</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06)">
+            <span>🚗 汽车</span><span>¥800 / ¥2,000</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>横向滚动 + 详情</h3>
+      <p>顶部分类横向滚轮，选中一个看详情（类 iOS 健康）</p>
+      <div class="mockup" style="margin-top:12px">
+        <div class="mockup-body" style="padding:16px;font-family:system-ui,sans-serif;font-size:13px;background:#0a0a1a;color:#e0e0e0;border-radius:12px">
+          <!-- Horizontal scroll -->
+          <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px">
+            <div style="flex-shrink:0;background:#4fc3f7;color:#000;padding:8px 16px;border-radius:20px;font-weight:600;font-size:13px">🍜 餐饮</div>
+            <div style="flex-shrink:0;background:rgba(255,255,255,0.08);padding:8px 16px;border-radius:20px;font-size:13px">💰 购物</div>
+            <div style="flex-shrink:0;background:rgba(255,255,255,0.08);padding:8px 16px;border-radius:20px;font-size:13px">🚗 汽车</div>
+            <div style="flex-shrink:0;background:rgba(255,255,255,0.08);padding:8px 16px;border-radius:20px;font-size:13px">🏠 居家</div>
+            <div style="flex-shrink:0;background:rgba(255,255,255,0.08);padding:8px 16px;border-radius:20px;font-size:13px">🎮 娱乐</div>
+          </div>
+          <!-- Detail area -->
+          <div style="background:rgba(255,255,255,0.04);border-radius:12px;padding:16px">
+            <div style="text-align:center;margin-bottom:12px">
+              <div style="position:relative;width:100px;height:100px;margin:0 auto;border-radius:50%;background:conic-gradient(#4fc3f7 0% 65%, rgba(255,255,255,0.08) 65% 100%);display:flex;align-items:center;justify-content:center">
+                <div style="width:64px;height:64px;border-radius:50%;background:#0a0a1a;display:flex;flex-direction:column;align-items:center;justify-content:center">
+                  <span style="font-size:16px;font-weight:700">65%</span>
+                  <span style="font-size:10px;color:#aaa">月预算</span>
+                </div>
+              </div>
+              <div style="margin-top:8px;font-size:12px;color:#aaa">本月 ¥1,950 / ¥3,000</div>
+            </div>
+            <div style="font-size:11px;color:#aaa;margin-bottom:8px">子分类预算</div>
+            <div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:8px;margin-bottom:6px">
+              <div style="display:flex;justify-content:space-between"><span>午餐</span><span>¥400 / ¥1,000</span></div>
+              <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:4px"><div style="height:100%;width:40%;background:#4fc3f7;border-radius:2px"></div></div>
+            </div>
+            <div style="padding:8px;background:rgba(255,255,255,0.03);border-radius:8px">
+              <div style="display:flex;justify-content:space-between"><span>外卖</span><span>¥800 / ¥1,500</span></div>
+              <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-top:4px"><div style="height:100%;width:53%;background:#4fc3f7;border-radius:2px"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

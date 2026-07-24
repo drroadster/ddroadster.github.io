@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liquid Glass Demo — Segmented Control & Music Player</title>
+<style>
+:root{font-family:"SF Pro Display","Inter",-apple-system,"PingFang SC",sans-serif}
+
+body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:48px;
+  background:#0f0f1a;color:#e2e8f0;padding:40px 20px;transition:background .4s}
+
+/* ═══════════ SCENE 1: Segmented Control ═══════════ */
+.scene1{
+  width:100%;max-width:420px;border-radius:24px;padding:32px 28px;position:relative;overflow:hidden;
+  background:rgba(22,22,38,0.82);
+  backdrop-filter:blur(24px) saturate(1.4);
+  -webkit-backdrop-filter:blur(24px) saturate(1.4);
+  border:1px solid rgba(255,255,255,0.06);
+  box-shadow:0 8px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.03);
+}
+
+/* Subtle noise overlay */
+.scene1 .noise,.scene2 .noise{
+  position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+  background-size:120px 120px;mix-blend-mode:overlay;
+}
+
+.scene1>*{position:relative;z-index:1}
+
+.scene-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(148,163,184,.5);margin-bottom:20px}
+
+/* ── Segmented Control ── */
+.segmented{
+  display:inline-flex;background:rgba(15,15,28,0.65);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-radius:99px;padding:4px;gap:2px;
+  border:1px solid rgba(255,255,255,0.05);
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.3);
+  position:relative;
+}
+
+.seg-item{
+  position:relative;padding:10px 22px;border-radius:99px;font-size:14px;font-weight:600;
+  border:none;cursor:pointer;color:rgba(148,163,184,.7);
+  background:transparent;transition:all .25s cubic-bezier(.16,1,.3,1);
+  z-index:1;
+}
+
+.seg-item.selected{
+  color:#f1f5f9;z-index:2;
+  /* Selected: bright glass */
+  background:rgba(255,255,255,0.13);
+  backdrop-filter:blur(16px) brightness(1.25);
+  -webkit-backdrop-filter:blur(16px) brightness(1.25);
+  border:1px solid rgba(255,255,255,0.16);
+  box-shadow:
+    0 2px 12px rgba(0,0,0,.25),
+    0 0 0 1px rgba(255,255,255,.06),
+    inset 0 1px 0 rgba(255,255,255,.15),
+    inset 0 -1px 0 rgba(0,0,0,.08);
+}
+
+/* Floating selected indicator */
+.seg-indicator{
+  position:absolute;top:4px;border-radius:99px;height:calc(100% - 8px);
+  background:rgba(255,255,255,0.13);
+  backdrop-filter:blur(16px) brightness(1.25);
+  -webkit-backdrop-filter:blur(16px) brightness(1.25);
+  border:1px solid rgba(255,255,255,0.14);
+  box-shadow:0 3px 16px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.12);
+  transition:left .35s cubic-bezier(.16,1,.3,1),width .35s cubic-bezier(.16,1,.3,1);
+  pointer-events:none;z-index:0;
+}
+
+/* Summary card below */
+.summary{
+  margin-top:20px;padding:16px 20px;border-radius:16px;
+  background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,.04);
+}
+.summary .label{font-size:11px;color:rgba(148,163,184,.5);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.summary .value{font-size:28px;font-weight:800;margin:4px 0 2px;letter-spacing:-.01em}
+.summary .detail{font-size:13px;color:rgba(148,163,184,.6)}
+.summary .bar{margin-top:12px;height:6px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}
+.summary .bar-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#818cf8,#a78bfa);transition:width .45s cubic-bezier(.16,1,.3,1)}
+
+/* ═══════════ SCENE 2: Music Player ═══════════ */
+.scene2-wrap{
+  width:100%;max-width:420px;min-height:520px;border-radius:28px;overflow:hidden;position:relative;
+  background:
+    linear-gradient(135deg,#1a0a2e,#0f0a2a,#15082e,#1a0a2e);
+  background-size:400% 400%;
+  animation:bgShift 12s ease infinite;
+  box-shadow:0 24px 80px rgba(0,0,0,.45);
+}
+@keyframes bgShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* Dynamic color blobs */
+.scene2-bg{position:absolute;inset:0;pointer-events:none}
+.scene2-bg .blob{
+  position:absolute;border-radius:50%;filter:blur(80px);opacity:.55;
+}
+.scene2-bg .blob:nth-child(1){
+  width:320px;height:320px;background:radial-gradient(circle,rgba(147,51,234,.45),transparent);
+  top:-80px;right:-60px;
+}
+.scene2-bg .blob:nth-child(2){
+  width:260px;height:260px;background:radial-gradient(circle,rgba(59,130,246,.35),transparent);
+  bottom:-60px;left:-40px;
+}
+.scene2-bg .blob:nth-child(3){
+  width:200px;height:200px;background:radial-gradient(circle,rgba(236,72,153,.25),transparent);
+  top:40%;left:40%;
+}
+
+/* The glass panel */
+.scene2{
+  position:absolute;inset:20px;border-radius:24px;overflow:hidden;
+  /* Key: high transparency + heavy blur */
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(40px) saturate(1.8) brightness(0.95);
+  -webkit-backdrop-filter:blur(40px) saturate(1.8) brightness(0.95);
+  border:1px solid rgba(255,255,255,.08);
+  /* Colored edge glow */
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.04),
+    inset 0 -1px 0 rgba(0,0,0,.08),
+    0 0 0 1px rgba(147,51,234,.08);
+  display:flex;flex-direction:column;padding:32px 28px 28px;
+}
+
+.scene2::before{
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  /* Edge gradient glow */
+  background:linear-gradient(
+    180deg,
+    rgba(147,51,234,.08) 0%,
+    rgba(99,102,241,.03) 30%,
+    transparent 60%,
+    rgba(236,72,153,.04) 100%
+  );
+}
+
+.scene2>*{position:relative;z-index:1}
+
+/* ── Player content ── */
+.player-header{display:flex;justify-content:space-between;align-items:center}
+.player-header .icon{width:36px;height:36px;border-radius:50%;
+  background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;
+  font-size:16px;cursor:pointer;transition:background .2s}
+.player-header .icon:hover{background:rgba(255,255,255,.14)}
+
+.album-art{
+  width:180px;height:180px;border-radius:24px;margin:32px auto 0;
+  background:linear-gradient(135deg,#4c1d95,#312e81,#1e1b4b);
+  display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;
+  box-shadow:
+    0 16px 48px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.06);
+}
+.album-art::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 40% at 50% 30%,rgba(255,255,255,.08),transparent 60%);
+  border-radius:inherit;
+}
+.album-art .disc{
+  width:60px;height:60px;border-radius:50%;
+  background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.1);
+  box-shadow:inset 0 0 20px rgba(255,255,255,.04);
+}
+
+.track-info{margin-top:28px;text-align:center}
+.track-info .title{font-size:20px;font-weight:800;letter-spacing:-.01em;margin-bottom:4px}
+.track-info .artist{font-size:13px;color:rgba(148,163,184,.7)}
+
+/* Progress bar */
+.progress{margin-top:24px}
+.progress-bar{height:4px;border-radius:99px;background:rgba(255,255,255,.08);position:relative}
+.progress-bar .fill{height:100%;width:42%;border-radius:99px;background:linear-gradient(90deg,#a78bfa,#818cf8)}
+.progress-bar .thumb{position:absolute;top:-5px;left:42%;width:14px;height:14px;border-radius:50%;
+  background:#e2e8f0;box-shadow:0 0 8px rgba(129,140,248,.5);transform:translateX(-50%)}
+.progress-time{display:flex;justify-content:space-between;margin-top:4px;font-size:11px;color:rgba(148,163,184,.5)}
+
+/* Controls */
+.controls{display:flex;justify-content:center;align-items:center;gap:24px;margin-top:24px}
+.ctrl-btn{
+  width:44px;height:44px;border-radius:50%;border:none;cursor:pointer;
+  background:rgba(255,255,255,.06);color:rgba(226,232,240,.7);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.05);
+  transition:all .2s;
+}
+.ctrl-btn:hover{background:rgba(255,255,255,.12);color:#f1f5f9}
+.ctrl-btn.play{
+  width:58px;height:58px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 4px 20px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.1);
+  font-size:22px;
+}
+.ctrl-btn.play:hover{background:rgba(255,255,255,.18);box-shadow:0 6px 28px rgba(0,0,0,.30)}
+
+/* Volume slider */
+.volume{display:flex;align-items:center;gap:10px;margin-top:20px;padding:0 10px}
+.volume .icon{font-size:14px;color:rgba(148,163,184,.5)}
+.volume-slider{flex:1;height:3px;border-radius:99px;background:rgba(255,255,255,.06);position:relative}
+.volume-slider .fill{height:100%;width:68%;border-radius:99px;background:rgba(148,163,184,.5)}
+
+/* ═══════════ Responsive ═══════════ */
+@media(max-width:480px){
+  body{gap:32px;padding:24px 16px}
+  .scene2-wrap{min-height:460px}
+  .album-art{width:140px;height:140px;margin-top:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════ SCENE 1 ═══════════════════════ -->
+<div class="scene1">
+  <div class="noise"></div>
+  <div class="scene-label">Scene 1 · Segmented Control</div>
+
+  <div class="segmented" id="seg1">
+    <div class="seg-indicator" id="segIndicator"></div>
+    <button class="seg-item" data-period="week">Week</button>
+    <button class="seg-item selected" data-period="month">Month</button>
+    <button class="seg-item" data-period="year">Year</button>
+  </div>
+
+  <div class="summary" id="summary">
+    <div class="label">Total Spending · Month</div>
+    <div class="value">¥ 8,420</div>
+    <div class="detail">42 transactions · 3 categories above budget</div>
+    <div class="bar"><div class="bar-fill" id="summaryBar" style="width:68%"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ SCENE 2 ═══════════════════════ -->
+<div class="scene2-wrap">
+  <div class="scene2-bg">
+    <div class="blob"></div><div class="blob"></div><div class="blob"></div>
+  </div>
+
+  <div class="scene2">
+    <div class="noise"></div>
+
+    <div class="player-header">
+      <div class="icon" style="font-size:14px">‹</div>
+      <div style="font-size:12px;color:rgba(148,163,184,.4);font-weight:700;letter-spacing:.08em;text-transform:uppercase">Now Playing</div>
+      <div class="icon" style="font-size:14px">···</div>
+    </div>
+
+    <div class="album-art">
+      <div class="disc"></div>
+    </div>
+
+    <div class="track-info">
+      <div class="title">Starlight Reverie</div>
+      <div class="artist">Aurora Veil · Dreamscape</div>
+    </div>
+
+    <div class="progress">
+      <div class="progress-bar">
+        <div class="fill"></div>
+        <div class="thumb"></div>
+      </div>
+      <div class="progress-time"><span>1:42</span><span>4:05</span></div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn">⟲</button>
+      <button class="ctrl-btn">⏮</button>
+      <button class="ctrl-btn play">▶</button>
+      <button class="ctrl-btn">⏭</button>
+      <button class="ctrl-btn">♡</button>
+    </div>
+
+    <div class="volume">
+      <span class="icon">🔈</span>
+      <div class="volume-slider"><div class="fill"></div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Segmented Control logic ── */
+(function(){
+  const seg=document.getElementById('seg1');
+  const indicator=document.getElementById('segIndicator');
+  const bar=document.getElementById('summaryBar');
+  const label=document.querySelector('#summary .label');
+  const value=document.querySelector('#summary .value');
+  const detail=document.querySelector('#summary .detail');
+
+  const data={
+    week:{label:'Total Spending · Week',val:'¥ 1,940',detail:'12 transactions · Dining tops at 42%',pct:38},
+    month:{label:'Total Spending · Month',val:'¥ 8,420',detail:'42 transactions · 3 categories above budget',pct:68},
+    year:{label:'Total Spending · Year',val:'¥ 63,500',detail:'487 transactions · Travel spike in July',pct:82}
+  };
+
+  function moveIndicator(target){
+    const rect=target.getBoundingClientRect();
+    const segRect=seg.getBoundingClientRect();
+    indicator.style.left=(rect.left-segRect.left)+'px';
+    indicator.style.width=rect.width+'px';
+  }
+
+  // Init indicator
+  const selected=seg.querySelector('.seg-item.selected');
+  if(selected)moveIndicator(selected);
+
+  // Also need to remove selected class from all items since we use indicator
+  seg.querySelectorAll('.seg-item').forEach(btn=>{
+    btn.classList.remove('selected');
+    btn.addEventListener('click',function(){
+      const period=this.dataset.period;
+      // Update indicator
+      moveIndicator(this);
+      // Update data
+      const d=data[period];
+      label.textContent=d.label;
+      value.textContent=d.val;
+      detail.textContent=d.detail;
+      bar.style.width=d.pct+'%';
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

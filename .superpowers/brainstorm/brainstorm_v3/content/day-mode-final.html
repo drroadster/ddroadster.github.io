@@ -1,0 +1,131 @@
+<h2>最终设计 · 日模式效果预览</h2>
+<p class="subtitle">方案 B 整合：下拉年份 + 月份标签 + 3列日卡片</p>
+
+<div class="mockup">
+  <div class="mockup-header">记账明细 — 日模式</div>
+  <div class="mockup-body" style="padding:0">
+
+    <!-- Year + Month selector -->
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.06)">
+      <select style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#fff;padding:6px 10px;font-size:13px;font-weight:700">
+        <option>2024年</option>
+        <option>2025年</option>
+        <option selected>2026年</option>
+      </select>
+      <div style="display:flex;gap:4px;overflow-x:auto;flex:1">
+        <span style="padding:4px 11px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,.05);white-space:nowrap">1月</span>
+        <span style="padding:4px 11px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,.05);white-space:nowrap">2月</span>
+        <span style="padding:4px 11px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,.05);white-space:nowrap">3月</span>
+        <span style="padding:4px 11px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,.05);white-space:nowrap">4月</span>
+        <span style="padding:4px 11px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,.05);white-space:nowrap">5月</span>
+        <span style="padding:4px 11px;border-radius:14px;font-size:11px;font-weight:600;background:rgba(255,255,255,.05);white-space:nowrap">6月</span>
+        <span style="padding:4px 11px;border-radius:14px;font-size:11px;font-weight:700;background:var(--color-accent);color:#fff;white-space:nowrap">7月</span>
+      </div>
+    </div>
+
+    <!-- Monthly summary -->
+    <div style="padding:12px 14px;display:flex;gap:18px;font-size:12px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.04)">
+      <span style="color:#34c759">收入 +¥18,200</span>
+      <span style="color:#ff3b30">支出 -¥12,856</span>
+      <span style="color:#fff">结余 +¥5,344</span>
+    </div>
+
+    <!-- Day cards grid -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 14px">
+
+      <!-- Card: no transaction -->
+      <div style="background:rgba(255,255,255,.02);border-radius:10px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,.03)">
+        <div style="font-size:12px;color:rgba(255,255,255,.25)">1<span style="font-size:10px">日</span> <span style="font-size:10px">周三</span></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.12);margin-top:3px">无记录</div>
+      </div>
+
+      <!-- Card: with transactions -->
+      <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,.04)">
+        <div style="font-size:12px;color:rgba(255,255,255,.5)">3<span style="font-size:10px">日</span> <span style="font-size:10px">周五</span></div>
+        <div style="font-size:13px;font-weight:800;color:#34c759;margin-top:2px">+¥320</div>
+        <div style="display:flex;gap:2px;justify-content:center;margin-top:3px">
+          <span style="width:5px;height:5px;border-radius:50%;background:#34c759"></span>
+          <span style="width:5px;height:5px;border-radius:50%;background:#ff3b30"></span>
+        </div>
+      </div>
+
+      <!-- Card: expanded (today/latest) -->
+      <div style="background:rgba(255,255,255,.05);border-radius:10px;border:1px solid var(--color-accent);overflow:hidden;grid-column:1/-1;text-align:left">
+        <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.03);cursor:pointer">
+          <div>
+            <span style="font-weight:700;font-size:14px">12日</span>
+            <span style="font-size:11px;color:#aaa;margin-left:4px">星期六</span>
+            <span style="font-size:10px;background:rgba(255,255,255,.06);padding:1px 7px;border-radius:8px;margin-left:6px">3笔</span>
+          </div>
+          <span style="font-size:13px;font-weight:700;color:#ff3b30">-¥856</span>
+        </div>
+        <!-- Expanded transactions -->
+        <div style="padding:0 12px">
+          <div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:10px">
+            <span style="background:linear-gradient(135deg,rgba(0,122,255,.16),rgba(175,82,222,.16));width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px">🍔</span>
+            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">餐饮 · 午餐外卖</div><div style="font-size:10px;color:#888">12:30</div></div>
+            <span style="font-size:13px;font-weight:700;color:#ff3b30">-¥56</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:10px">
+            <span style="background:linear-gradient(135deg,rgba(52,199,89,.16),rgba(0,199,190,.16));width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px">🚗</span>
+            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">交通 · 打车</div><div style="font-size:10px;color:#888">14:15</div></div>
+            <span style="font-size:13px;font-weight:700;color:#ff3b30">-¥800</span>
+          </div>
+          <div style="display:flex;align-items:center;padding:9px 0;gap:10px">
+            <span style="background:linear-gradient(135deg,rgba(255,149,0,.16),rgba(255,204,0,.16));width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px">🛒</span>
+            <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:600">购物 · 日用品</div><div style="font-size:10px;color:#888">18:00</div></div>
+            <span style="font-size:13px;font-weight:700;color:#34c759">+¥0<span style="opacity:.4">.00</span></span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px">
+  <h3>交互行为确认</h3>
+  <div class="split">
+    <div class="mockup">
+      <div class="mockup-header">卡片折叠状态</div>
+      <div class="mockup-body" style="padding:16px">
+        <div style="background:rgba(255,255,255,.03);border-radius:10px;padding:12px;text-align:center">
+          <div style="font-weight:700;font-size:14px">7月3日 <span style="font-size:11px;color:#aaa">周五</span></div>
+          <div style="font-size:16px;font-weight:800;color:#34c759;margin:4px 0">+¥320</div>
+          <div style="display:flex;gap:2px;justify-content:center">
+            <span style="width:5px;height:5px;border-radius:50%;background:#34c759"></span>
+            <span style="width:5px;height:5px;border-radius:50%;background:#ff3b30"></span>
+          </div>
+        </div>
+        <p style="font-size:11px;color:#888;margin-top:8px">3列网格排布。点击任意卡片 →</p>
+      </div>
+    </div>
+    <div class="mockup">
+      <div class="mockup-header">卡片展开状态</div>
+      <div class="mockup-body" style="padding:16px">
+        <div style="background:rgba(255,255,255,.05);border-radius:10px;border:1px solid var(--color-accent);overflow:hidden">
+          <div style="padding:10px 12px;display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,.03);font-weight:700;font-size:13px">
+            7月12日 周六 · 3笔 <span style="color:#ff3b30">-¥856</span>
+          </div>
+          <div style="padding:8px 12px;font-size:12px">
+            <div style="display:flex;justify-content:space-between;padding:4px 0"><span>🍔 餐饮</span><span style="color:#ff3b30">-¥56</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0"><span>🚗 交通</span><span style="color:#ff3b30">-¥800</span></div>
+          </div>
+        </div>
+        <p style="font-size:11px;color:#888;margin-top:8px">展开占满整行(grid-column:1/-1)，下方卡片自动下移</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>核心规则</h3>
+  <ul style="font-size:13px;line-height:1.8;color:rgba(255,255,255,.75)">
+    <li><strong>月份导航</strong>：左侧下拉选年份，右侧横向滚动选月份标签，当前月高亮</li>
+    <li><strong>月度概览</strong>：顶部一行显示选中月的总收入 / 总支出 / 结余</li>
+    <li><strong>日卡片</strong>：桌面 3 列网格，无记录日显示灰色占位；有记录日显示净额 + 彩色圆点</li>
+    <li><strong>展开交互</strong>：点击后该日卡片扩展为整行（grid-column: 1/-1），下方列出当日交易明细；再次点击收起</li>
+    <li><strong>默认状态</strong>：进入页面时，有记录的最新日期自动展开</li>
+    <li><strong>搜索/筛选时</strong>：退回到平铺列表模式（同现有逻辑）</li>
+  </ul>
+</div>

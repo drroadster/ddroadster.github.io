@@ -5,7 +5,7 @@
 // ═══════════════════════════════════════════════════════
 
 import { getAssets, upsertAsset, deleteAsset, getAssetHistory,
-         recordSnapshot, importAssetSnapshots } from '../store.js';
+         recordSnapshot, importAssetSnapshots, updateHistorySnapshot } from '../store.js';
 import { subscribe } from '../store.js';
 import { buildLineChart, buildDoughnut, buildHorizBar, buildSparklineSvg,
          cssVar, palette } from '../charts.js';
@@ -95,6 +95,12 @@ function _wireControls() {
   document.getElementById('assetCsvInput')?.addEventListener('change', _handleAssetCSV);
   document.querySelectorAll('[data-export="asset"], [data-export="asset-history"]').forEach(btn => {
     btn.addEventListener('click', () => _exportAssetCSV(btn.dataset.export));
+  });
+
+  // Asset detail overlay
+  document.getElementById('assetDetailClose')?.addEventListener('click', _closeAssetDetail);
+  document.getElementById('assetDetailOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'assetDetailOverlay') _closeAssetDetail();
   });
 }
 
@@ -253,6 +259,15 @@ function _renderGrid(assets) {
     btn.addEventListener('click', (e) => { e.stopPropagation(); _deleteAssetConfirm(btn.dataset.deleteAsset); }));
   grid.querySelectorAll('[data-edit-asset]').forEach(btn =>
     btn.addEventListener('click', () => openAssetModal(btn.dataset.editAsset)));
+  // Click on bank card to open asset detail / history timeline
+  grid.querySelectorAll('.bank-card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if (e.target.closest('[data-delete-asset]') || e.target.closest('[data-edit-asset]')) return;
+      const assetId = card.dataset.assetId;
+      const asset = getAssets().find(a => a.id === assetId);
+      if (asset) _showAssetDetail(asset);
+    });
+  });
 }
 
 function _firstIndexLetter(name) {
@@ -275,7 +290,7 @@ function _bankCardHtml(asset) {
   const initial = (asset.name || '?').trim().charAt(0).toUpperCase();
   const gradient = ASSET_GRADIENTS[asset.category] || ASSET_GRADIENT_DEFAULT;
 
-  return `<div class="bank-card" style="background:${gradient}">
+  return `<div class="bank-card" data-asset-id="${asset.id}" style="background:${gradient}">
     <div class="bank-card-texture"></div>
     <div class="bank-card-top">
       <div class="bank-card-monogram">${esc(initial)}</div>
@@ -353,6 +368,76 @@ function _saveAsset() {
   closeAssetModal();
   showToast(t('toastAssetSaved'));
   render();
+}
+
+// ── Asset detail / history timeline ───────────────────
+
+function _showAssetDetail(asset) {
+  const history = getAssetHistory();
+  const points = [];
+
+  history.forEach(h => {
+    if (h.breakdown && h.breakdown[asset.id] !== undefined) {
+      points.push({ ts: h.ts, value: h.breakdown[asset.id] });
+    }
+  });
+  points.sort((a, b) => a.ts.localeCompare(b.ts));
+
+  document.getElementById('assetDetailTitle').textContent = `${asset.name} · 历史数据`;
+  const listEl = document.getElementById('assetDetailList');
+  listEl.innerHTML = points.length
+    ? points.map(p => `
+      <div class="asset-detail-row" data-ts="${esc(p.ts)}" data-value="${p.value}">
+        <div class="adr-date">${fmtDateShort(p.ts)}</div>
+        <div class="adr-value">¥${fmt(p.value)}</div>
+      </div>`).join('')
+    : `<div class="empty-state" style="padding:30px"><div class="empty-text">暂无历史数据</div></div>`;
+
+  // Show panel
+  document.getElementById('assetDetailOverlay').classList.add('open');
+
+  // Bind inline edit on value cells
+  listEl.querySelectorAll('.adr-value').forEach(el => {
+    el.addEventListener('click', (e) => _startEditHistoryPoint(e, asset));
+  });
+}
+
+function _closeAssetDetail() {
+  document.getElementById('assetDetailOverlay').classList.remove('open');
+}
+
+function _startEditHistoryPoint(e, asset) {
+  const row = e.target.closest('.asset-detail-row');
+  const valueEl = e.target;
+  const originalValue = parseFloat(row.dataset.value) || 0;
+
+  valueEl.innerHTML = `<input type="number" class="adr-input" value="${originalValue}" step="0.01" min="0">`;
+  const input = valueEl.querySelector('.adr-input');
+  input.focus();
+  input.select();
+
+  const save = () => {
+    const newVal = parseFloat(input.value);
+    if (isNaN(newVal) || newVal < 0) {
+      valueEl.textContent = `¥${fmt(originalValue)}`;
+      return;
+    }
+    _saveAssetHistoryEdit(row.dataset.ts, asset, newVal);
+  };
+
+  input.addEventListener('blur', save);
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') { input.blur(); }
+    if (ev.key === 'Escape') { valueEl.textContent = `¥${fmt(originalValue)}`; }
+  });
+}
+
+function _saveAssetHistoryEdit(ts, asset, newValue) {
+  const ok = updateHistorySnapshot(ts, asset.id, newValue);
+  if (ok) {
+    showToast('已更新');
+    _showAssetDetail(asset);
+  }
 }
 
 // ── CSV import (multi-asset snapshot format) ──────────

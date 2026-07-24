@@ -922,3 +922,113 @@
     font-size: 11.5px; gap: 10px;
   }
 }
+
+/* ── Asset detail / history timeline panel ──────────── */
+.asset-detail-sheet {
+  max-width: 480px;
+  width: 100%;
+}
+
+.asset-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.asset-detail-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+.asset-detail-close {
+  background: none;
+  border: none;
+  color: var(--color-label-2);
+  font-size: 18px;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+
+.asset-detail-close:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+}
+
+.asset-detail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 50vh;
+  overflow-y: auto;
+}
+
+.asset-detail-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: var(--r-card);
+  transition: background 0.15s;
+}
+
+.asset-detail-row:hover {
+  background: var(--glass-input);
+}
+
+.adr-date {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-label-2);
+  white-space: nowrap;
+}
+
+.adr-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  transition: background 0.15s, color 0.15s;
+  min-width: 80px;
+  text-align: right;
+}
+
+.adr-value:hover {
+  background: rgba(77, 163, 255, 0.12);
+  color: var(--color-accent);
+}
+
+.adr-input {
+  width: 120px;
+  padding: 4px 8px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  background: var(--glass-input);
+  border: 1.5px solid var(--color-accent);
+  border-radius: var(--r-pill);
+  color: var(--color-text);
+  outline: none;
+  font-family: inherit;
+}
+
+.adr-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(77, 163, 255, 0.18);
+}
+
+/* Make bank card feel clickable */
+.bank-card {
+  cursor: pointer;
+}

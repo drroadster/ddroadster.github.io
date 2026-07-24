@@ -1,0 +1,12 @@
+name = "roadster"
+main = "src/index.ts"
+compatibility_date = "2025-07-08"
+
+[[kv_namespaces]]
+binding = "ROADSTER_KV"
+id = "cacad77c87744a1eb5159f59d0cc3bc4"
+
+workers_dev = true
+
+[observability]
+enabled = true

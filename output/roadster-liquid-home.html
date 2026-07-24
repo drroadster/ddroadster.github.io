@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadster · Liquid Glass Preview</title>
+<style>
+/* ═══════════════════════════════════════════════
+   ROADSTER LIQUID GLASS · Design Tokens
+   Purple-Violet-Indigo Deep Space
+   ═══════════════════════════════════════════════ */
+:root {
+  --font: "SF Pro Display","Inter",-apple-system,"PingFang SC",sans-serif;
+  --font-mono: "JetBrains Mono","SF Mono",monospace;
+
+  /* Radius */
+  --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px; --r-2xl:36px; --r-pill:999px;
+
+  /* Easing */
+  --e-out: cubic-bezier(.16,1,.3,1);
+  --e-spring: cubic-bezier(.34,1.56,.64,1);
+  --dur-fast:180ms; --dur-base:280ms; --dur-slow:450ms;
+
+  /* Blur hierarchy */
+  --blur-subtle:4px;
+  --blur-bar:10px;
+  --blur-card:18px;
+  --blur-hero:36px;
+  --blur-modal:48px;
+
+  /* ── Dark Mode (default) ── */
+  --canvas: #060413;
+  --canvas-deep: #03010a;
+
+  /* Surface — layered transparency */
+  --surface-bar:  rgba(18,14,42,0.52);
+  --surface-card: rgba(18,14,42,0.58);
+  --surface-elevated: rgba(22,16,48,0.72);
+  --surface-input: rgba(18,14,42,0.48);
+  --surface-seg: rgba(12,8,30,0.62);
+
+  /* Text */
+  --text-1: #f1f5f9;
+  --text-2: #cbd5e1;
+  --text-3: #94a3b8;
+  --text-4: #64748b;
+
+  /* Border */
+  --border: rgba(139,92,246,0.08);
+  --border-glow: rgba(139,92,246,0.14);
+  --border-bright: rgba(255,255,255,0.08);
+
+  /* Accent — Rich purple-indigo spectrum */
+  --brand:       #a78bfa;
+  --brand-deep:  #7c3aed;
+  --brand-glow:  rgba(139,92,246,0.30);
+  --brand-solid: #8b5cf6;
+
+  --green:  #34d399;
+  --red:    #fb7185;
+  --orange: #fbbf24;
+  --pink:   #f472b6;
+  --cyan:   #22d3ee;
+  --teal:   #2dd4bf;
+
+  /* Gradients */
+  --grad-brand: linear-gradient(135deg, #7c3aed 0%, #8b5cf6 40%, #a78bfa 100%);
+  --grad-hero:  linear-gradient(160deg, rgba(124,58,237,.15) 0%, rgba(139,92,246,.08) 50%, rgba(167,139,250,.05) 100%);
+  --grad-income: linear-gradient(135deg, #34d399 0%, #2dd4bf 100%);
+  --grad-expense:linear-gradient(135deg, #f43f5e 0%, #fb7185 100%);
+
+  /* Shadow */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,.20);
+  --shadow-sm: 0 2px 8px rgba(0,0,0,.25);
+  --shadow-md: 0 6px 18px rgba(0,0,0,.30);
+  --shadow-lg: 0 14px 32px rgba(0,0,0,.38);
+  --shadow-xl: 0 24px 56px rgba(0,0,0,.45);
+
+  /* Glow */
+  --glow-brand: 0 6px 28px rgba(139,92,246,0.28);
+  --glow-purple:0 6px 24px rgba(167,139,250,0.22);
+
+  /* Chart */
+  --chart-1:#a78bfa; --chart-2:#22d3ee; --chart-3:#34d399;
+  --chart-4:#fbbf24; --chart-5:#fb7185; --chart-6:#f472b6;
+
+  /* Segmented indicator */
+  --seg-indicator-bg: rgba(139,92,246,0.18);
+}
+
+/* ── Light Mode ── */
+:root[data-theme="light"] {
+  --canvas: #f0f0ff;
+  --canvas-deep: #e8e4ff;
+  --surface-bar:  rgba(255,255,255,0.55);
+  --surface-card: rgba(255,255,255,0.62);
+  --surface-elevated: rgba(255,255,255,0.78);
+  --surface-input: rgba(241,241,255,0.50);
+  --surface-seg: rgba(240,238,255,0.60);
+  --text-1: #0f172a;
+  --text-2: #334155;
+  --text-3: #64748b;
+  --text-4: #94a3b8;
+  --border: rgba(99,102,241,0.08);
+  --border-glow: rgba(99,102,241,0.12);
+  --border-bright: rgba(99,102,241,0.06);
+  --brand: #6366f1;
+  --brand-deep: #4f46e5;
+  --brand-glow: rgba(99,102,241,0.22);
+  --brand-solid: #6366f1;
+  --green:#10b981; --red:#f43f5e; --orange:#f59e0b;
+  --pink:#ec4899; --cyan:#06b6d4; --teal:#14b8a6;
+  --shadow-xs: 0 1px 2px rgba(15,23,42,.03);
+  --shadow-sm: 0 2px 8px rgba(15,23,42,.04);
+  --shadow-md:0 6px 16px rgba(15,23,42,.05);
+  --shadow-lg:0 12px 28px rgba(15,23,42,.06);
+  --shadow-xl:0 24px 48px rgba(15,23,42,.08);
+  --glow-brand:0 4px 20px rgba(99,102,241,.20);
+  --glow-purple:0 4px 20px rgba(139,92,246,.16);
+  --seg-indicator-bg: rgba(99,102,241,0.12);
+}
+
+/* ═══════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{
+  font-family:var(--font);background:var(--canvas);color:var(--text-1);
+  min-height:100vh;transition:background var(--dur-slow) var(--e-out);
+}
+
+/* ── Animated Nebula Background ── */
+.nebula{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
+.nebula .blob{
+  position:absolute;border-radius:50%;filter:blur(120px);opacity:0.45;
+  transition:opacity var(--dur-slow);
+}
+.nebula .blob:nth-child(1){
+  width:50vw;height:50vw;max-width:700px;max-height:700px;
+  background:radial-gradient(circle,rgba(124,58,237,.38),transparent);
+  top:-15%;right:-10%;
+  animation:drift1 20s ease-in-out infinite;
+}
+.nebula .blob:nth-child(2){
+  width:40vw;height:40vw;max-width:550px;max-height:550px;
+  background:radial-gradient(circle,rgba(59,130,246,.25),transparent);
+  bottom:-10%;left:-8%;
+  animation:drift2 25s ease-in-out infinite;
+}
+.nebula .blob:nth-child(3){
+  width:35vw;height:35vw;max-width:450px;max-height:450px;
+  background:radial-gradient(circle,rgba(236,72,153,.18),transparent);
+  top:45%;left:55%;
+  animation:drift3 22s ease-in-out infinite;
+}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-4vw,3vw) scale(1.08)}66%{transform:translate(2vw,-2vw) scale(0.94)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(3vw,-4vw) scale(1.06)}66%{transform:translate(-2vw,2vw) scale(0.96)}}
+@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-3vw,-3vw) scale(1.1)}}
+
+/* ── App Shell ── */
+.app-shell{max-width:1100px;margin:0 auto;padding:0 24px 64px}
+
+/* ═══════════════════════════════════════════════
+   TOP BAR — Liquid Glass
+   ═══════════════════════════════════════════════ */
+.topbar{
+  position:sticky;top:12px;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 20px;border-radius:var(--r-xl);
+  background:var(--surface-bar);
+  backdrop-filter:blur(var(--blur-bar)) saturate(1.6) brightness(1.04);
+  -webkit-backdrop-filter:blur(var(--blur-bar)) saturate(1.6) brightness(1.04);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm),inset 0 1px 0 rgba(255,255,255,.03);
+  margin-top:16px;
+}
+.topbar::after{ /* noise overlay */
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+  background-size:120px 120px;mix-blend-mode:overlay;
+}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text-1)}
+.brand-mark{
+  width:34px;height:34px;border-radius:var(--r-sm);
+  background:var(--grad-brand);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:16px;color:#fff;
+  box-shadow:0 2px 8px rgba(139,92,246,.35);
+}
+.brand-copy{display:flex;flex-direction:column}
+.brand-name{font-size:15px;font-weight:800;letter-spacing:-.01em}
+.brand-sub{font-size:9px;font-weight:700;color:var(--text-4);letter-spacing:.08em}
+
+.topnav{display:flex;gap:2px;background:var(--surface-seg);border-radius:var(--r-pill);padding:3px;border:1px solid var(--border)}
+.nav-item{
+  border:none;background:transparent;padding:8px 16px;border-radius:var(--r-pill);
+  font-size:13px;font-weight:600;color:var(--text-3);cursor:pointer;
+  transition:all var(--dur-fast) var(--e-out);
+}
+.nav-item:hover{color:var(--text-2)}
+.nav-item.active{
+  background:var(--seg-indicator-bg);color:var(--text-1);
+  box-shadow:0 1px 6px rgba(0,0,0,.15);
+}
+
+.topbar-right{display:flex;align-items:center;gap:10px}
+.theme-toggle{display:flex;gap:2px;background:var(--surface-seg);border-radius:var(--r-pill);padding:2px}
+.theme-btn{
+  border:none;background:transparent;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;cursor:pointer;transition:all var(--dur-fast);
+  color:var(--text-4);
+}
+.theme-btn.active{background:var(--seg-indicator-bg);color:var(--text-1)}
+.btn-add{
+  border:none;padding:8px 18px;border-radius:var(--r-pill);
+  background:var(--grad-brand);color:#fff;font-size:13px;font-weight:700;
+  cursor:pointer;box-shadow:0 2px 10px rgba(139,92,246,.35);
+  transition:all var(--dur-fast) var(--e-out);
+}
+.btn-add:hover{box-shadow:0 4px 18px rgba(139,92,246,.45);transform:translateY(-1px)}
+
+@media(max-width:720px){
+  .topbar{padding:8px 14px;border-radius:var(--r-lg)}
+  .topnav .nav-item{padding:6px 12px;font-size:12px}
+  .brand-sub{display:none}
+}
+
+/* ═══════════════════════════════════════════════
+   PAGE HEADER
+   ═══════════════════════════════════════════════ */
+.page-header{margin-top:28px;display:flex;align-items:center;gap:12px}
+.page-header .wave{font-size:28px}
+.page-header h1{font-size:22px;font-weight:800;letter-spacing:-.01em}
+.page-header .sub{font-size:13px;color:var(--text-4);font-weight:500}
+
+/* ═══════════════════════════════════════════════
+   SEGMENTED CONTROL — Floating Pill
+   ═══════════════════════════════════════════════ */
+.seg-wrap{display:flex;justify-content:space-between;align-items:center;margin:16px 0 18px}
+.segmented{
+  position:relative;display:inline-flex;gap:2px;
+  background:var(--surface-seg);
+  backdrop-filter:blur(var(--blur-subtle));-webkit-backdrop-filter:blur(var(--blur-subtle));
+  border-radius:var(--r-pill);padding:4px;
+  border:1px solid var(--border);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.15);
+}
+.seg-indicator{
+  position:absolute;top:4px;border-radius:var(--r-pill);height:calc(100% - 8px);
+  background:var(--seg-indicator-bg);
+  backdrop-filter:blur(12px) brightness(1.2);
+  -webkit-backdrop-filter:blur(12px) brightness(1.2);
+  border:1px solid var(--border-glow);
+  box-shadow:0 2px 12px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.08);
+  transition:left .35s var(--e-out),width .35s var(--e-out);
+  pointer-events:none;z-index:0;
+}
+.seg-pill{
+  position:relative;z-index:1;border:none;background:transparent;
+  padding:9px 20px;border-radius:var(--r-pill);
+  font-size:13px;font-weight:600;color:var(--text-3);cursor:pointer;
+  transition:color var(--dur-fast) var(--e-out);
+}
+.seg-pill:hover{color:var(--text-2)}
+.seg-pill.active{color:var(--text-1)}
+
+.seg-extra{font-size:12px;color:var(--text-4);font-weight:500}
+
+/* ═══════════════════════════════════════════════
+   HERO CARD — High Transparency + Heavy Blur
+   ═══════════════════════════════════════════════ */
+.hero{
+  position:relative;overflow:hidden;isolation:isolate;
+  border-radius:var(--r-xl);padding:28px 30px;
+  background:rgba(18,14,42,0.42);
+  backdrop-filter:blur(var(--blur-hero)) saturate(1.8) brightness(.96);
+  -webkit-backdrop-filter:blur(var(--blur-hero)) saturate(1.8) brightness(.96);
+  border:1px solid var(--border-glow);
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 1px 0 rgba(255,255,255,.02),
+    inset 0 -1px 0 rgba(0,0,0,.06);
+  margin-bottom:16px;
+}
+.hero::before{ /* top edge highlight */
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:0;
+  background:radial-gradient(ellipse 80% 30% at 50% 0%,rgba(167,139,250,.06),transparent 60%);
+}
+.hero::after{ /* noise */
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='nh'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.6' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23nh)' opacity='0.025'/%3E%3C/svg%3E");
+  background-size:100px 100px;mix-blend-mode:overlay;
+}
+.hero>*{position:relative;z-index:1}
+
+.hero-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-4);margin-bottom:4px}
+.hero-value{font-size:clamp(32px,5vw,44px);font-weight:800;letter-spacing:-.03em;margin-bottom:2px}
+.hero-sub{font-size:13px;color:var(--text-3)}
+
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+.hero-stat .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4)}
+.hero-stat .value{font-size:20px;font-weight:800;margin-top:2px}
+.hero-stat .value.income{color:var(--green)}
+.hero-stat .value.expense{color:var(--red)}
+.hero-stat .value.rate{color:var(--brand)}
+
+/* ═══════════════════════════════════════════════
+   SECTION HEADER
+   ═══════════════════════════════════════════════ */
+.sh{display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px}
+.sh-title{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4)}
+.sh-action{font-size:12px;color:var(--brand);font-weight:600;cursor:pointer;border:none;background:none}
+.sh-action:hover{text-decoration:underline}
+
+/* ═══════════════════════════════════════════════
+   CARD — Glass with Edge Glow + Noise
+   ═══════════════════════════════════════════════ */
+.card{
+  position:relative;overflow:hidden;isolation:isolate;
+  border-radius:var(--r-lg);padding:22px 24px;
+  background:var(--surface-card);
+  backdrop-filter:blur(var(--blur-card)) saturate(1.4) brightness(1.02);
+  -webkit-backdrop-filter:blur(var(--blur-card)) saturate(1.4) brightness(1.02);
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-sm),inset 0 1px 0 rgba(255,255,255,.02);
+  transition:all var(--dur-base) var(--e-out);
+}
+.card:hover{
+  background:var(--surface-elevated);
+  box-shadow:var(--shadow-md),0 0 0 1px var(--border-glow);
+}
+.card .noise{
+  position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='nc'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23nc)' opacity='0.02'/%3E%3C/svg%3E");
+  background-size:100px 100px;mix-blend-mode:overlay;
+}
+.card>*{position:relative;z-index:1}
+
+/* Card mini (stat cards in grid) */
+.card-mini{padding:18px 20px;border-radius:var(--r-md)}
+.stat-value{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.stat-label{font-size:11px;color:var(--text-4);font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:.05em}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+
+/* ═══════════════════════════════════════════════
+   CHART PLACEHOLDER
+   ═══════════════════════════════════════════════ */
+.chart-area{
+  min-height:200px;display:flex;align-items:center;justify-content:center;
+  color:var(--text-4);font-size:13px;padding:20px 0;
+}
+.chart-area svg{width:100%;max-height:180px}
+.chart-title{font-size:14px;font-weight:800;margin-bottom:2px}
+.chart-sub{font-size:11px;color:var(--text-4);margin-bottom:12px}
+
+/* ═══════════════════════════════════════════════
+   RECENT TRANSACTIONS
+   ═══════════════════════════════════════════════ */
+.tx-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.tx-item:last-child{border-bottom:none}
+.tx-left{display:flex;align-items:center;gap:12px}
+.tx-icon{
+  width:38px;height:38px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+  font-size:16px;background:var(--surface-elevated);border:1px solid var(--border);
+}
+.tx-icon.income{background:rgba(52,211,153,.08);border-color:rgba(52,211,153,.15)}
+.tx-icon.expense{background:rgba(251,113,133,.08);border-color:rgba(251,113,133,.15)}
+.tx-cat{font-size:13px;font-weight:700}
+.tx-note{font-size:12px;color:var(--text-4);margin-top:1px}
+.tx-right{text-align:right}
+.tx-amount{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.tx-amount.income{color:var(--green)}
+.tx-amount.expense{color:var(--red)}
+.tx-date{font-size:11px;color:var(--text-4);margin-top:1px}
+
+/* ── Empty state ── */
+.empty{text-align:center;padding:40px 20px;color:var(--text-4)}
+.empty .icon{font-size:36px;margin-bottom:8px}
+.empty .text{font-size:13px;line-height:1.6}
+
+/* ── Legend ── */
+.legend-flow{display:flex;flex-wrap:wrap;gap:12px;margin-top:12px}
+.legend-dot{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-3)}
+.legend-dot::before{content:'';width:8px;height:8px;border-radius:2px}
+.legend-dot.l1::before{background:var(--chart-1)}.legend-dot.l2::before{background:var(--chart-2)}
+.legend-dot.l3::before{background:var(--chart-3)}.legend-dot.l4::before{background:var(--chart-4)}
+.legend-dot.l5::before{background:var(--chart-5)}.legend-dot.l6::before{background:var(--chart-6)}
+
+@media(max-width:720px){
+  .app-shell{padding:0 14px 48px}
+  .hero{padding:20px 22px}
+  .hero-stats{grid-template-columns:repeat(3,1fr);gap:8px}
+  .hero-stat .value{font-size:16px}
+  .grid-2,.grid-4{grid-template-columns:1fr}
+  .stat-value{font-size:22px}
+}
+
+/* ═══════════════════════════════════════════════
+   TOOLTIP for empty chart
+   ═══════════════════════════════════════════════ */
+.tooltip-row{display:flex;align-items:center;gap:8px;padding:6px 0;color:var(--text-3);font-size:12px}
+.tooltip-dot{width:6px;height:6px;border-radius:50%}
+
+/* ═══════════════════════════════════════════════
+   RIPPLE on Add Button
+   ═══════════════════════════════════════════════ */
+@keyframes ripple{to{transform:scale(3);opacity:0}}
+</style>
+</head>
+<body>
+
+<div class="nebula">
+  <div class="blob"></div><div class="blob"></div><div class="blob"></div>
+</div>
+
+<div class="app-shell">
+
+  <!-- ═══════════ TOP BAR ═══════════ -->
+  <header class="topbar">
+    <a href="#" class="brand">
+      <div class="brand-mark">R</div>
+      <div class="brand-copy">
+        <span class="brand-name">Roadster</span>
+        <span class="brand-sub">PERSONAL FINANCE COPILOT</span>
+      </div>
+    </a>
+    <nav class="topnav">
+      <button class="nav-item active">概览</button>
+      <button class="nav-item">记账</button>
+      <button class="nav-item">资产</button>
+      <button class="nav-item">分析</button>
+    </nav>
+    <div class="topbar-right">
+      <div class="theme-toggle">
+        <button class="theme-btn" data-theme="dark" title="深色">🌙</button>
+        <button class="theme-btn" data-theme="light" title="浅色">☀️</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════ PAGE HEADER ═══════════ -->
+  <div class="page-header">
+    <span class="wave">👋</span>
+    <div>
+      <h1>早上好</h1>
+      <div class="sub">这是你的财务总览</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ SEGMENTED CONTROL ═══════════ -->
+  <div class="seg-wrap">
+    <div class="segmented" id="periodSeg">
+      <div class="seg-indicator" id="segInd"></div>
+      <button class="seg-pill" data-period="month">本月</button>
+      <button class="seg-pill" data-period="quarter">本季</button>
+      <button class="seg-pill" data-period="year">今年</button>
+      <button class="seg-pill" data-period="all">全部</button>
+    </div>
+    <span class="seg-extra">2026年7月</span>
+  </div>
+
+  <!-- ═══════════ HERO CARD ═══════════ -->
+  <div class="hero">
+    <div class="hero-label">净结余 · NET BALANCE</div>
+    <div class="hero-value" id="netAmount">¥ 18,420.50</div>
+    <div class="hero-sub">较上月 +12.4%</div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="label">收入</div>
+        <div class="value income">¥ 32,150</div>
+      </div>
+      <div class="hero-stat">
+        <div class="label">支出</div>
+        <div class="value expense">¥ 13,729.50</div>
+      </div>
+      <div class="hero-stat">
+        <div class="label">储蓄率</div>
+        <div class="value rate">57.3%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ TREND CHART ═══════════ -->
+  <div class="sh"><div class="sh-title">收支走势</div></div>
+  <div class="card">
+    <div class="noise"></div>
+    <div class="chart-area">
+      <svg viewBox="0 0 600 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Grid lines -->
+        <line x1="0" y1="45" x2="600" y2="45" stroke="var(--border)" stroke-width="1"/>
+        <line x1="0" y1="90" x2="600" y2="90" stroke="var(--border)" stroke-width="1"/>
+        <line x1="0" y1="135" x2="600" y2="135" stroke="var(--border)" stroke-width="1"/>
+        <!-- Income area -->
+        <defs><linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34d399" stop-opacity="0.25"/><stop offset="100%" stop-color="#34d399" stop-opacity="0"/></linearGradient></defs>
+        <path d="M0,100 L50,95 L100,110 L150,85 L200,75 L250,90 L300,65 L350,70 L400,60 L450,55 L500,68 L550,50 L600,45 L600,150 L0,150 Z" fill="url(#incomeGrad)"/>
+        <path d="M0,100 L50,95 L100,110 L150,85 L200,75 L250,90 L300,65 L350,70 L400,60 L450,55 L500,68 L550,50 L600,45" stroke="#34d399" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Expense area -->
+        <defs><linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fb7185" stop-opacity="0.20"/><stop offset="100%" stop-color="#fb7185" stop-opacity="0"/></linearGradient></defs>
+        <path d="M0,80 L50,88 L100,75 L150,92 L200,85 L250,95 L300,82 L350,88 L400,78 L450,90 L500,85 L550,92 L600,88 L600,150 L0,150 Z" fill="url(#expenseGrad)"/>
+        <path d="M0,80 L50,88 L100,75 L150,92 L200,85 L250,95 L300,82 L350,88 L400,78 L450,90 L500,85 L550,92 L600,88" stroke="#fb7185" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Labels -->
+        <text x="0" y="22" fill="var(--text-4)" font-size="9" font-family="var(--font-mono)">7/1</text>
+        <text x="150" y="22" fill="var(--text-4)" font-size="9" font-family="var(--font-mono)">7/7</text>
+        <text x="300" y="22" fill="var(--text-4)" font-size="9" font-family="var(--font-mono)">7/14</text>
+        <text x="450" y="22" fill="var(--text-4)" font-size="9" font-family="var(--font-mono)">7/21</text>
+        <text x="575" y="22" fill="var(--text-4)" font-size="9" font-family="var(--font-mono)" text-anchor="end">今日</text>
+      </svg>
+    </div>
+    <div class="legend-flow">
+      <div class="legend-dot l1">收入 ¥32,150</div>
+      <div class="legend-dot l2">支出 ¥13,730</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ PIE CHARTS ═══════════ -->
+  <div class="grid-2" style="margin-top:14px">
+    <div class="card">
+      <div class="noise"></div>
+      <div class="chart-title">支出分类</div>
+      <div class="chart-sub">各类别占比</div>
+      <div class="chart-area" style="min-height:160px">
+        <svg viewBox="0 0 160 160" style="width:140px;height:140px">
+          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--border)" stroke-width="16"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#a78bfa" stroke-width="16"
+            stroke-dasharray="154 286" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#22d3ee" stroke-width="16"
+            stroke-dasharray="88 352" stroke-dashoffset="-154" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#34d399" stroke-width="16"
+            stroke-dasharray="66 374" stroke-dashoffset="-242" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#fbbf24" stroke-width="16"
+            stroke-dasharray="44 396" stroke-dashoffset="-308" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#fb7185" stroke-width="16"
+            stroke-dasharray="33 407" stroke-dashoffset="-352" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <text x="80" y="76" text-anchor="middle" fill="var(--text-1)" font-size="16" font-weight="800">¥13,730</text>
+          <text x="80" y="92" text-anchor="middle" fill="var(--text-4)" font-size="10">总支出</text>
+        </svg>
+      </div>
+      <div class="legend-flow">
+        <div class="legend-dot l1">餐饮 35%</div><div class="legend-dot l2">交通 20%</div>
+        <div class="legend-dot l3">购物 15%</div><div class="legend-dot l4">娱乐 10%</div>
+        <div class="legend-dot l5">其他 7.5%</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="noise"></div>
+      <div class="chart-title">收入分类</div>
+      <div class="chart-sub">各类别占比</div>
+      <div class="chart-area" style="min-height:160px">
+        <svg viewBox="0 0 160 160" style="width:140px;height:140px">
+          <circle cx="80" cy="80" r="70" fill="none" stroke="var(--border)" stroke-width="16"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#34d399" stroke-width="16"
+            stroke-dasharray="264 176" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#a78bfa" stroke-width="16"
+            stroke-dasharray="110 330" stroke-dashoffset="-264" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <circle cx="80" cy="80" r="70" fill="none" stroke="#22d3ee" stroke-width="16"
+            stroke-dasharray="44 396" stroke-dashoffset="-374" stroke-linecap="round" transform="rotate(-90 80 80)"/>
+          <text x="80" y="76" text-anchor="middle" fill="var(--text-1)" font-size="16" font-weight="800">¥32,150</text>
+          <text x="80" y="92" text-anchor="middle" fill="var(--text-4)" font-size="10">总收入</text>
+        </svg>
+      </div>
+      <div class="legend-flow">
+        <div class="legend-dot l1">工资 60%</div><div class="legend-dot l2">副业 25%</div>
+        <div class="legend-dot l3">投资 10%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ RECENT TRANSACTIONS ═══════════ -->
+  <div class="sh">
+    <div class="sh-title">最近交易</div>
+    <button class="sh-action">查看全部 ›</button>
+  </div>
+  <div class="card">
+    <div class="noise"></div>
+    <div class="tx-item">
+      <div class="tx-left">
+        <div class="tx-icon income">🍽</div>
+        <div>
+          <div class="tx-cat">餐饮报销</div>
+          <div class="tx-note">团队聚餐 · 公司报销</div>
+        </div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount income">+ ¥ 860</div>
+        <div class="tx-date">7月7日 13:42</div>
+      </div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-left">
+        <div class="tx-icon expense">🛒</div>
+        <div>
+          <div class="tx-cat">超市购物</div>
+          <div class="tx-note">盒马鲜生 · 周末采购</div>
+        </div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount expense">- ¥ 328.50</div>
+        <div class="tx-date">7月6日 18:15</div>
+      </div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-left">
+        <div class="tx-icon income">💼</div>
+        <div>
+          <div class="tx-cat">工资收入</div>
+          <div class="tx-note">7月薪资</div>
+        </div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount income">+ ¥ 28,500</div>
+        <div class="tx-date">7月5日 09:00</div>
+      </div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-left">
+        <div class="tx-icon expense">🚇</div>
+        <div>
+          <div class="tx-cat">交通出行</div>
+          <div class="tx-note">地铁月卡充值</div>
+        </div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount expense">- ¥ 200</div>
+        <div class="tx-date">7月4日 08:30</div>
+      </div>
+    </div>
+    <div class="tx-item">
+      <div class="tx-left">
+        <div class="tx-icon expense">☕</div>
+        <div>
+          <div class="tx-cat">咖啡饮品</div>
+          <div class="tx-note">Manner · 燕麦拿铁</div>
+        </div>
+      </div>
+      <div class="tx-right">
+        <div class="tx-amount expense">- ¥ 25</div>
+        <div class="tx-date">7月4日 10:15</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ═══════════ SEGMENTED CONTROL ═══════════ */
+(function(){
+  const seg=document.getElementById('periodSeg');
+  const ind=document.getElementById('segInd');
+  const pills=seg.querySelectorAll('.seg-pill');
+
+  function moveIndicator(target){
+    ind.style.left=(target.offsetLeft-seg.offsetLeft)+'px';
+    ind.style.width=target.offsetWidth+'px';
+  }
+
+  // Find active pill
+  const active=seg.querySelector('.seg-pill.active')||pills[0];
+  pills.forEach(p=>p.classList.remove('active'));
+  active.classList.add('active');
+  moveIndicator(active);
+
+  pills.forEach(btn=>{
+    btn.addEventListener('click',function(){
+      pills.forEach(p=>p.classList.remove('active'));
+      this.classList.add('active');
+      moveIndicator(this);
+    });
+  });
+
+  window.addEventListener('resize',()=>{
+    const a=seg.querySelector('.seg-pill.active');
+    if(a)moveIndicator(a);
+  });
+})();
+
+/* ═══════════ THEME TOGGLE ═══════════ */
+(function(){
+  const btns=document.querySelectorAll('.theme-btn');
+  const html=document.documentElement;
+  // Default: dark
+  updateActive('dark');
+
+  btns.forEach(b=>{
+    b.addEventListener('click',function(){
+      const t=this.dataset.theme;
+      html.setAttribute('data-theme',t);
+      updateActive(t);
+    });
+  });
+
+  function updateActive(t){
+    btns.forEach(b=>b.classList.toggle('active',b.dataset.theme===t));
+  }
+})();
+</script>
+
+</body>
+</html>

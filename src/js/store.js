@@ -762,6 +762,27 @@ export function importAssetSnapshots(snaps) {
   return added;
 }
 
+/**
+ * Update a single asset's value in a historical snapshot.
+ * Recalculates the snapshot's total and persists.
+ * @param {string} ts - ISO timestamp of the snapshot to update
+ * @param {string} assetId
+ * @param {number} newValue
+ * @returns {boolean}
+ */
+export function updateHistorySnapshot(ts, assetId, newValue) {
+  const idx = _history.findIndex(h => h.ts === ts);
+  if (idx === -1) return false;
+
+  _history[idx].breakdown[assetId] = Number(newValue) || 0;
+  _history[idx].total = Object.values(_history[idx].breakdown).reduce((s, v) => s + (Number(v) || 0), 0);
+
+  _persist(LS.ASSET_HISTORY, _history);
+  _emit('history');
+  _emit('assets');
+  return true;
+}
+
 // ═══════════════════════════════════════════════════════
 //  v2.0 兼容层（保持所有 Pages 不变）
 // ═══════════════════════════════════════════════════════

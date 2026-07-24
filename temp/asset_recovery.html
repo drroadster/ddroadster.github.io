@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>Roadster 资产诊断与恢复</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background:#0d1117; color:#c9d1d9; padding:24px; min-height:100vh; }
+h2 { color:#58a6ff; margin-bottom:16px; font-size:20px; }
+h3 { color:#f0883e; margin:16px 0 8px; font-size:16px; }
+button { padding:8px 20px; margin:4px 8px 4px 0; border:none; border-radius:6px; cursor:pointer; font-size:14px; font-weight:600; }
+.btn-primary { background:#238636; color:#fff; }
+.btn-primary:hover { background:#2ea043; }
+.btn-danger { background:#da3633; color:#fff; }
+.btn-danger:hover { background:#f85149; }
+.btn-warn { background:#d29922; color:#000; }
+.btn-warn:hover { background:#e3b341; }
+.btn-secondary { background:#21262d; color:#c9d1d9; border:1px solid #30363d; }
+.btn-secondary:hover { background:#30363d; }
+pre { background:#161b22; border:1px solid #30363d; border-radius:6px; padding:16px; margin:12px 0; white-space:pre-wrap; word-break:break-all; font-size:13px; line-height:1.5; max-height:600px; overflow-y:auto; }
+.log-ok { color:#3fb950; }
+.log-warn { color:#d29922; }
+.log-err { color:#f85149; }
+.log-info { color:#8b949e; }
+table { border-collapse:collapse; width:100%; margin:12px 0; font-size:13px; }
+th, td { border:1px solid #30363d; padding:6px 10px; text-align:left; }
+th { background:#21262d; font-weight:600; }
+tr:hover { background:#161b22; }
+.badge { display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:600; }
+.badge-ok { background:#23863633; color:#3fb950; }
+.badge-warn { background:#d2992233; color:#d29922; }
+.badge-err { background:#da363333; color:#f85149; }
+.section { border:1px solid #30363d; border-radius:8px; padding:16px; margin:16px 0; }
+.summary-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:12px 0; }
+.summary-item { background:#161b22; border:1px solid #30363d; border-radius:8px; padding:12px; text-align:center; }
+.summary-item .label { font-size:12px; color:#8b949e; margin-bottom:4px; }
+.summary-item .value { font-size:24px; font-weight:700; }
+</style>
+</head>
+<body>
+
+<h2>Roadster 资产诊断与恢复工具</h2>
+<p style="color:#8b949e;margin-bottom:16px;">此页面读取浏览器 localStorage 中的资产数据，诊断问题并尝试恢复。</p>
+
+<div style="margin-bottom:16px;">
+  <button class="btn-primary" onclick="runDiagnose()">🔍 全面诊断</button>
+  <button class="btn-warn" onclick="tryRecoverFromOld()">📦 从旧格式恢复</button>
+  <button class="btn-secondary" onclick="tryRecoverFromHistory()">📅 从历史快照恢复</button>
+  <button class="btn-danger" onclick="resetMigration()">🔄 重置迁移标记</button>
+</div>
+
+<div id="output"></div>
+
+<script>
+const LS = {
+  OLD_ASSETS: 'rdstr_assets',
+  ASSET_DRAFTS: 'rdstr_asset_drafts',
+  ASSET_HISTORY: 'rdstr_asset_history',
+  MIGRATED_V23: 'rdstr_migrated_v23',
+};
+
+const $ = (s) => document.querySelector(s);
+const out = $('#output');
+
+function log(msg, cls = 'log-info') {
+  out.innerHTML += `<span class="${cls}">${msg}</span>\n`;
+}
+
+function section(title) {
+  out.innerHTML += `<div class="section"><h3>${title}</h3>`;
+}
+
+function sectionEnd() {
+  out.innerHTML += `</div>`;
+}
+
+function clearOutput() {
+  out.innerHTML = '';
+}
+
+// ── Core ──
+
+function readLS(key) {
+  const raw = localStorage.getItem(key);
+  if (raw === null) return null;
+  try { return JSON.parse(raw); }
+  catch (e) { return { _parseError: true, _raw: raw, _error: e.message }; }
+}
+
+function fmtISO(ts) {
+  if (!ts) return '-';
+  try { return new Date(ts).toISOString().split('T')[0]; }
+  catch { return String(ts).slice(0, 10); }
+}
+
+function isAbnormalId(id) {
+  if (!id) return false;
+  if (id.includes('.')) return true;
+  if (/^ast-/.test(id) && id.includes('-', 4)) return true;
+  return false;
+}
+
+// ── 诊断 ──
+
+function runDiagnose() {
+  clearOutput();
+
+  section('1. localStorage Key 扫描');
+  const keys = [
+    LS.OLD_ASSETS,
+    LS.ASSET_DRAFTS,
+    LS.ASSET_HISTORY,
+    LS.MIGRATED_V23,
+    'roadster_assets',
+    'rdstr_drafts',
+  ];
+
+  const results = {};
+  for (const key of keys) {
+    const raw = localStorage.getItem(key);
+    if (raw === null) {
+      results[key] = null;
+      log(`${key}: 不存在`, 'log-err');
+    } else {
+      const parsed = readLS(key);
+      const size = raw.length;
+      const items = Array.isArray(parsed) ? parsed.length :
+                    (parsed && typeof parsed === 'object' && !parsed._parseError) ? Object.keys(parsed).length : '?';
+      results[key] = parsed;
+      log(`${key}: 存在 (${size} bytes, ${items} items)`, 'log-ok');
+    }
+  }
+  sectionEnd();
+
+  // 2. 分析 rdstr_asset_drafts
+  section('2. 当前资产草稿 (rdstr_asset_drafts)');
+  const drafts = results[LS.ASSET_DRAFTS];
+  if (drafts && Array.isArray(drafts)) {
+    const active = drafts.filter(a => !a.deleted);
+    const deleted = drafts.filter(a => a.deleted);
+    const withName = active.filter(a => a.name && a.name.length > 0 && !isAbnormalId(a.name));
+    const noName = active.filter(a => !a.name || a.name.length === 0 || isAbnormalId(a.name));
+    const abnormal = active.filter(a => isAbnormalId(a.id));
+
+    log(`总数: ${drafts.length} | 有效: ${active.length} | 已删除: ${deleted.length}`);
+    log(`有名称: ${withName.length} | 无名称/异常名: ${noName.length} | 异常ID: ${abnormal.length}`, 
+        abnormal.length > 0 ? 'log-err' : 'log-ok');
+
+    if (withName.length > 0) {
+      log('\n正常资产:', 'log-ok');
+      let table = '<table><tr><th>名称</th><th>类别</th><th>金额</th><th>ID</th></tr>';
+      withName.slice(0, 20).forEach(a => {
+        table += `<tr><td>${a.name}</td><td>${a.category||'-'}</td><td>${(a.value||0).toLocaleString()}</td><td style="font-size:11px;color:#8b949e">${a.id}</td></tr>`;
+      });
+      if (withName.length > 20) table += `<tr><td colspan="4" style="color:#8b949e">... 还有 ${withName.length - 20} 条</td></tr>`;
+      table += '</table>';
+      out.innerHTML += table;
+    }
+
+    if (noName.length > 0 || abnormal.length > 0) {
+      log('\n异常资产明细:', 'log-err');
+      const allBad = [...noName, ...abnormal].filter((a, i, arr) => arr.indexOf(a) === i);
+      let table = '<table><tr><th>ID</th><th>名称</th><th>金额</th></tr>';
+      allBad.slice(0, 10).forEach(a => {
+        table += `<tr><td style="font-size:11px">${a.id}</td><td>${a.name||'(空)'}</td><td>${a.value||0}</td></tr>`;
+      });
+      if (allBad.length > 10) table += `<tr><td colspan="3" style="color:#8b949e">... 还有 ${allBad.length - 10} 条</td></tr>`;
+      table += '</table>';
+      out.innerHTML += table;
+
+      log(`\n<span class="badge badge-warn">建议</span> 点击「从旧格式恢复」或「从历史快照恢复」后，异常数据将被覆盖`, 'log-info');
+    }
+  } else {
+    log('rdstr_asset_drafts 为空或格式异常', 'log-err');
+    if (drafts) log(`数据类型: ${typeof drafts}, _parseError: ${drafts._parseError}`, 'log-info');
+  }
+  sectionEnd();
+
+  // 3. 旧格式
+  section('3. 旧格式数据 (rdstr_assets)');
+  const oldAssets = results[LS.OLD_ASSETS];
+  if (oldAssets && Array.isArray(oldAssets) && oldAssets.length > 0) {
+    const active = oldAssets.filter(a => !a.deleted);
+    log(`✅ 旧格式仍存在！共 ${oldAssets.length} 条，有效 ${active.length} 条`, 'log-ok');
+    if (active.length > 0) {
+      log(`字段: ${Object.keys(active[0]).join(', ')}`);
+      let table = '<table><tr><th>名称</th><th>类别</th><th>金额</th><th>ID</th></tr>';
+      active.slice(0, 10).forEach(a => {
+        table += `<tr><td>${a.name||'-'}</td><td>${a.category||'-'}</td><td>${(a.value||0).toLocaleString()}</td><td style="font-size:11px">${a.id||'-'}</td></tr>`;
+      });
+      table += '</table>';
+      out.innerHTML += table;
+      log('\n✅ 可从旧格式完全恢复（含名称和分类）！点击「从旧格式恢复」按钮', 'log-ok');
+    }
+  } else {
+    log('❌ 旧格式已不存在（迁移后已被删除）', 'log-err');
+  }
+  sectionEnd();
+
+  // 4. 历史快照
+  section('4. 历史快照 (rdstr_asset_history)');
+  const history = results[LS.ASSET_HISTORY];
+  if (history && Array.isArray(history) && history.length > 0) {
+    log(`快照总数: ${history.length}`, 'log-ok');
+    const latest = history[history.length - 1];
+    log(`最新快照: ${fmtISO(latest.ts || latest.date)}`, 'log-info');
+    log(`总资产值: ${(latest.total || 0).toLocaleString()}`);
+    
+    const bd = latest.breakdown;
+    if (bd && typeof bd === 'object' && !Array.isArray(bd)) {
+      const entries = Object.entries(bd);
+      log(`breakdown 格式: Object, ${entries.length} 条 (id → value)`, 'log-info');
+      log('示例: ' + entries.slice(0, 3).map(([k,v]) => `${k}=${v}`).join(', '), 'log-info');
+      log('\n⚠️ 快照中仅有 ID 和金额，无名称和分类。恢复后需手动补充名称。', 'log-warn');
+    } else if (Array.isArray(bd)) {
+      log(`breakdown 格式: Array, ${bd.length} 条`, 'log-info');
+      const sample = bd[0];
+      log(`条目字段: ${sample ? Object.keys(sample).join(', ') : 'N/A'}`);
+    } else {
+      log('breakdown 格式异常: ' + typeof bd, 'log-err');
+      log('快照结构: ' + JSON.stringify(latest).slice(0, 400));
+    }
+  } else {
+    log('❌ 历史快照为空或不存在', 'log-err');
+  }
+  sectionEnd();
+
+  // 5. 恢复建议
+  section('5. 恢复建议');
+  const hasOld = oldAssets && Array.isArray(oldAssets) && oldAssets.filter(a => !a.deleted).length > 0;
+  const hasHistory = history && Array.isArray(history) && history.length > 0;
+  const hasValidDrafts = drafts && Array.isArray(drafts) && 
+                         drafts.filter(a => !a.deleted && a.name && a.name.length > 0 && !isAbnormalId(a.name)).length > 0;
+
+  if (hasValidDrafts) {
+    log('✅ 当前已有正常资产数据！如果页面仍不显示，请硬刷新（Ctrl+Shift+R）', 'log-ok');
+  } else if (hasOld) {
+    log('✅ 最佳方案：从旧格式恢复（完整保留名称和分类）→ 点击「从旧格式恢复」', 'log-ok');
+  } else if (hasHistory) {
+    log('⚠️ 次优方案：从历史快照恢复（仅恢复 ID 和金额，需手动补充名称）→ 点击「从历史快照恢复」', 'log-warn');
+  } else {
+    log('❌ 无可恢复数据。如果曾登录，请检查 Firestore 云端是否还有数据。', 'log-err');
+  }
+  sectionEnd();
+}
+
+// ── 恢复 ──
+
+function tryRecoverFromOld() {
+  clearOutput();
+  section('从旧格式恢复');
+
+  const oldAssets = readLS(LS.OLD_ASSETS);
+  if (!oldAssets || !Array.isArray(oldAssets) || oldAssets.length === 0) {
+    log('❌ rdstr_assets 不存在或为空', 'log-err');
+    sectionEnd();
+    return;
+  }
+
+  const active = oldAssets.filter(a => !a.deleted);
+  const restored = active.map(a => ({
+    id: a.id || ('recovered_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8)),
+    name: a.name || '未命名资产',
+    category: a.category || 'other',
+    value: typeof a.value === 'number' ? a.value : (parseFloat(a.value) || 0),
+    note: a.note || '',
+    date: a.date || a.createdAt || a.updatedAt || new Date().toISOString().split('T')[0],
+    createdAt: a.createdAt || new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    deviceId: a.deviceId || 'recovered',
+    version: (a.version || 0) + 1,
+    deleted: false
+  }));
+
+  localStorage.setItem(LS.ASSET_DRAFTS, JSON.stringify(restored));
+  log(`✅ 已恢复 ${restored.length} 条资产到 rdstr_asset_drafts`, 'log-ok');
+  
+  let table = '<table><tr><th>名称</th><th>类别</th><th>金额</th></tr>';
+  restored.forEach(a => {
+    table += `<tr><td>${a.name}</td><td>${a.category}</td><td>${a.value.toLocaleString()}</td></tr>`;
+  });
+  table += '</table>';
+  out.innerHTML += table;
+
+  log('\n✅ 恢复完成！刷新 Roadster 页面即可看到资产。', 'log-ok');
+  sectionEnd();
+}
+
+function tryRecoverFromHistory() {
+  clearOutput();
+  section('从历史快照恢复');
+
+  const history = readLS(LS.ASSET_HISTORY);
+  if (!history || !Array.isArray(history) || history.length === 0) {
+    log('❌ rdstr_asset_history 不存在或为空', 'log-err');
+    sectionEnd();
+    return;
+  }
+
+  const latest = history[history.length - 1];
+  const bd = latest.breakdown;
+
+  if (!bd) {
+    log('❌ 快照中无 breakdown 字段', 'log-err');
+    log('快照结构: ' + JSON.stringify(latest).slice(0, 500));
+    sectionEnd();
+    return;
+  }
+
+  let entries;
+  if (typeof bd === 'object' && !Array.isArray(bd)) {
+    // Object: { id: value }
+    entries = Object.entries(bd).map(([id, value]) => ({ id, value }));
+    log(`breakdown 格式: Object → 解析出 ${entries.length} 条`, 'log-info');
+  } else if (Array.isArray(bd)) {
+    // Array: [{id, name?, value?}] or [{...}]
+    entries = bd.map((item, i) => ({
+      id: item.id || item.name || ('snap_' + i),
+      name: item.name || null,
+      value: item.value || 0,
+      category: item.category || null
+    }));
+    log(`breakdown 格式: Array → 解析出 ${entries.length} 条`, 'log-info');
+  } else {
+    log('❌ breakdown 格式无法识别: ' + typeof bd, 'log-err');
+    sectionEnd();
+    return;
+  }
+
+  if (entries.length === 0) {
+    log('❌ breakdown 为空', 'log-err');
+    sectionEnd();
+    return;
+  }
+
+  const restored = entries.map((e, i) => ({
+    id: e.id,
+    name: e.name || ('快照恢复_' + (i + 1)),
+    category: e.category || 'other',
+    value: typeof e.value === 'number' ? e.value : (parseFloat(e.value) || 0),
+    note: '从历史快照恢复 (' + fmtISO(latest.ts || latest.date) + ')',
+    date: fmtISO(latest.ts || latest.date),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    deviceId: 'snapshot_recovery',
+    version: 1,
+    deleted: false
+  }));
+
+  localStorage.setItem(LS.ASSET_DRAFTS, JSON.stringify(restored));
+  log(`✅ 已恢复 ${restored.length} 条资产到 rdstr_asset_drafts`, 'log-ok');
+  log('⚠️ 注意：名称和分类可能已丢失，请手动编辑补充。', 'log-warn');
+
+  let table = '<table><tr><th>名称</th><th>金额</th><th>ID</th></tr>';
+  restored.forEach(a => {
+    table += `<tr><td>${a.name}</td><td>${a.value.toLocaleString()}</td><td style="font-size:11px">${a.id}</td></tr>`;
+  });
+  table += '</table>';
+  out.innerHTML += table;
+
+  log('\n✅ 恢复完成！刷新 Roadster 页面即可看到资产。', 'log-ok');
+  sectionEnd();
+}
+
+function resetMigration() {
+  clearOutput();
+  section('重置迁移标记');
+  localStorage.removeItem(LS.MIGRATED_V23);
+  log('✅ 已删除迁移标记 rdstr_migrated_v23', 'log-ok');
+  
+  const oldAssets = localStorage.getItem(LS.OLD_ASSETS);
+  if (oldAssets) {
+    log('✅ rdstr_assets 仍存在，刷新后将重新执行迁移', 'log-ok');
+  } else {
+    log('⚠️ rdstr_assets 也不存在，重置标记无法恢复数据', 'log-warn');
+  }
+  
+  log('\n刷新 Roadster 页面后，迁移将重新执行。', 'log-info');
+  sectionEnd();
+}
+
+// Auto-run on load
+window.addEventListener('DOMContentLoaded', () => {
+  runDiagnose();
+});
+</script>
+</body>
+</html>

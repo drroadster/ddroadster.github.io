@@ -1,0 +1,46 @@
+<h2>日记账模式 · 三种设计方案</h2>
+<p class="subtitle">目标：从"按月折叠"改为"按日分组"，支持便捷切换月份/年份。<br>请选择一个偏好的方案，再深入细化。</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>时间线滚动模式</h3>
+      <p>顶部月份导航栏 + 按日连续滚动的交易列表。<br>整月无缝浏览，日头显示日期/星期/收支小计。<br><strong>最接近当前架构，改动最小。</strong></p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>月份标签页 + 日卡片</h3>
+      <p>顶部横向滚动月份标签，选中月份以网格卡片展示每天。<br>卡片显示日期、笔数、净额，点击展开当日明细。<br><strong>视觉更丰富，适合快速浏览月度概览。</strong></p>
+    </div>
+  </div>
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>统一列表模式</h3>
+      <p>将现有的月折叠展开为日折叠，二层嵌套结构。<br>月头可折叠/展开，内部按日分组，日头也可折叠。<br><strong>保持原有交互习惯，灵活性最高。</strong></p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>三种方案对比</h3>
+  <table style="width:100%;font-size:13px;border-collapse:collapse">
+    <thead>
+      <tr style="background:rgba(255,255,255,.04)">
+        <th style="padding:8px;text-align:left">维度</th>
+        <th style="padding:8px">A 时间线</th>
+        <th style="padding:8px">B 卡片</th>
+        <th style="padding:8px">C 嵌套折叠</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td style="padding:6px 8px">开发量</td><td style="padding:6px 8px;text-align:center">★☆☆ 小</td><td style="padding:6px 8px;text-align:center">★★★ 大</td><td style="padding:6px 8px;text-align:center">★★☆ 中</td></tr>
+      <tr><td style="padding:6px 8px">浏览效率</td><td style="padding:6px 8px;text-align:center">高</td><td style="padding:6px 8px;text-align:center">中</td><td style="padding:6px 8px;text-align:center">中</td></tr>
+      <tr><td style="padding:6px 8px">跨月对比</td><td style="padding:6px 8px;text-align:center">滚动即可</td><td style="padding:6px 8px;text-align:center">切标签页</td><td style="padding:6px 8px;text-align:center">折叠/展开</td></tr>
+      <tr><td style="padding:6px 8px">适配移动端</td><td style="padding:6px 8px;text-align:center">优秀</td><td style="padding:6px 8px;text-align:center">一般</td><td style="padding:6px 8px;text-align:center">良好</td></tr>
+    </tbody>
+  </table>
+</div>

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roadster · Liquid Glass Home</title>
+<style>
+/* ═══════════════════════════════════════════════
+   ROADSTER LIQUID GLASS · Design Tokens
+   ═══════════════════════════════════════════════ */
+:root {
+  --font: "SF Pro Display","Inter",-apple-system,"PingFang SC",sans-serif;
+  --font-mono: "JetBrains Mono","SF Mono",monospace;
+  --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:20px; --r-xl:28px; --r-pill:999px;
+  --e-out: cubic-bezier(.16,1,.3,1);
+
+  /* Dark (default) */
+  --canvas: #08041a;
+  --glass-bg: rgba(12,8,30,0.45);
+  --glass-border: rgba(139,92,246,0.10);
+  --glass-edge: rgba(147,51,234,0.07);
+  --surface-elevated: rgba(22,14,44,0.55);
+  --surface-input: rgba(18,10,36,0.50);
+  --surface-seg-bg: rgba(10,6,24,0.58);
+  --seg-active: rgba(139,92,246,0.16);
+  --text-1: #f1f5f9;
+  --text-2: #cbd5e1;
+  --text-3: #94a3b8;
+  --text-4: #64748b;
+  --brand: #a78bfa;
+  --brand-solid: #8b5cf6;
+  --brand-glow: rgba(139,92,246,0.28);
+  --green: #34d399;
+  --red: #fb7185;
+  --orange: #fbbf24;
+  --cyan: #22d3ee;
+  --border-subtle: rgba(255,255,255,0.04);
+  --chart-1:#a78bfa; --chart-2:#22d3ee; --chart-3:#34d399;
+  --chart-4:#fbbf24; --chart-5:#fb7185;
+}
+
+:root[data-theme="light"] {
+  --canvas: #f0f0ff;
+  --glass-bg: rgba(255,255,255,0.55);
+  --glass-border: rgba(99,102,241,0.10);
+  --glass-edge: rgba(99,102,241,0.06);
+  --surface-elevated: rgba(255,255,255,0.68);
+  --surface-input: rgba(241,241,255,0.52);
+  --surface-seg-bg: rgba(240,238,255,0.60);
+  --seg-active: rgba(99,102,241,0.10);
+  --text-1: #0f172a;
+  --text-2: #334155;
+  --text-3: #64748b;
+  --text-4: #94a3b8;
+  --brand: #6366f1;
+  --brand-solid: #6366f1;
+  --brand-glow: rgba(99,102,241,0.18);
+  --green: #10b981;
+  --red: #f43f5e;
+  --orange: #f59e0b;
+  --cyan: #06b6d4;
+  --border-subtle: rgba(99,102,241,0.05);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-font-smoothing:antialiased}
+body{
+  font-family:var(--font);background:var(--canvas);color:var(--text-1);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:20px;transition:background .5s var(--e-out);overflow-x:hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   ANIMATED NEBULA BACKGROUND
+   ═══════════════════════════════════════════════ */
+.nebula{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.nebula .blob{
+  position:absolute;border-radius:50%;filter:blur(100px);opacity:0.40;
+  transition:opacity .5s;
+}
+:root[data-theme="light"] .nebula .blob{opacity:0.28;filter:blur(80px)}
+.nebula .blob:nth-child(1){
+  width:55vw;height:55vw;max-width:700px;max-height:700px;
+  background:radial-gradient(circle,rgba(124,58,237,.45),transparent);
+  top:-20%;right:-12%;
+  animation:drift1 18s ease-in-out infinite;
+}
+.nebula .blob:nth-child(2){
+  width:45vw;height:45vw;max-width:600px;max-height:600px;
+  background:radial-gradient(circle,rgba(59,130,246,.30),transparent);
+  bottom:-15%;left:-10%;
+  animation:drift2 24s ease-in-out infinite;
+}
+.nebula .blob:nth-child(3){
+  width:32vw;height:32vw;max-width:420px;max-height:420px;
+  background:radial-gradient(circle,rgba(236,72,153,.20),transparent);
+  top:40%;left:50%;
+  animation:drift3 20s ease-in-out infinite;
+}
+.nebula .blob:nth-child(4){
+  width:22vw;height:22vw;max-width:280px;max-height:280px;
+  background:radial-gradient(circle,rgba(34,211,238,.15),transparent);
+  top:10%;left:25%;
+  animation:drift4 26s ease-in-out infinite;
+}
+@keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(-5vw,4vw) scale(1.08)}66%{transform:translate(3vw,-3vw) scale(0.93)}}
+@keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(4vw,-5vw) scale(1.06)}66%{transform:translate(-3vw,3vw) scale(0.95)}}
+@keyframes drift3{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-4vw,-3vw) scale(1.12)}}
+@keyframes drift4{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(3vw,4vw) scale(1.08)}}
+
+/* ═══════════════════════════════════════════════
+   MAIN GLASS PANEL — The "Music Player" Sheet
+   ═══════════════════════════════════════════════ */
+.panel{
+  position:relative;z-index:1;width:100%;max-width:1000px;overflow:hidden;isolation:isolate;
+  border-radius:32px;
+  /* High transparency + heavy blur — music player style */
+  background:var(--glass-bg);
+  backdrop-filter:blur(38px) saturate(1.8) brightness(0.94);
+  -webkit-backdrop-filter:blur(38px) saturate(1.8) brightness(0.94);
+  border:1px solid var(--glass-border);
+  /* Colored edge glow */
+  box-shadow:
+    0 28px 72px rgba(0,0,0,.42),
+    0 0 0 1px var(--glass-edge),
+    inset 0 1px 0 rgba(255,255,255,.03),
+    inset 0 -1px 0 rgba(0,0,0,.08);
+  padding:0;display:flex;flex-direction:column;
+}
+:root[data-theme="light"] .panel{
+  backdrop-filter:blur(32px) saturate(1.6) brightness(1.04);
+  -webkit-backdrop-filter:blur(32px) saturate(1.6) brightness(1.04);
+  box-shadow:
+    0 20px 60px rgba(15,23,42,.08),
+    0 0 0 1px var(--glass-edge),
+    inset 0 1px 0 rgba(255,255,255,.30),
+    inset 0 -1px 0 rgba(15,23,42,.03);
+}
+
+/* Edge gradient — purple top, pink bottom like music player */
+.panel::before{
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:0;
+  background:linear-gradient(
+    180deg,
+    rgba(147,51,234,.07) 0%,
+    rgba(99,102,241,.03) 25%,
+    transparent 55%,
+    rgba(236,72,153,.03) 100%
+  );
+}
+
+/* Noise texture overlay — eliminates plastic feel */
+.panel::after{
+  content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.62' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E");
+  background-size:120px 120px;mix-blend-mode:overlay;
+}
+
+/* All content sits above the noise/edge overlays */
+.panel>*{position:relative;z-index:1}
+
+
+/* ═══════════════════════════════════════════════
+   TOP BAR — inside the glass panel
+   ═══════════════════════════════════════════════ */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 28px 14px;
+  border-bottom:1px solid var(--border-subtle);
+}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-mark{
+  width:32px;height:32px;border-radius:10px;
+  background:linear-gradient(135deg,#7c3aed,#a78bfa);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:15px;color:#fff;
+  box-shadow:0 2px 8px rgba(139,92,246,.35);
+}
+.brand-name{font-size:16px;font-weight:800;letter-spacing:-.02em}
+.brand-sub{font-size:9px;font-weight:700;color:var(--text-4);letter-spacing:.08em;display:block}
+
+.topnav{display:flex;gap:1px;background:var(--surface-seg-bg);border-radius:var(--r-pill);padding:3px;border:1px solid var(--glass-border)}
+.nav-btn{
+  border:none;background:transparent;padding:7px 15px;border-radius:var(--r-pill);
+  font-size:12px;font-weight:600;color:var(--text-3);cursor:pointer;
+  transition:all .18s var(--e-out);
+}
+.nav-btn:hover{color:var(--text-2)}
+.nav-btn.active{
+  background:var(--seg-active);color:var(--text-1);
+  box-shadow:0 1px 4px rgba(0,0,0,.12);
+}
+
+.topbar-right{display:flex;align-items:center;gap:8px}
+.theme-toggle{display:flex;gap:1px;background:var(--surface-seg-bg);border-radius:var(--r-pill);padding:2px}
+.theme-btn{
+  border:none;background:transparent;width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;cursor:pointer;color:var(--text-4);transition:all .18s;
+}
+.theme-btn.active{background:var(--seg-active);color:var(--text-1)}
+
+
+/* ═══════════════════════════════════════════════
+   CONTENT AREA — scrollable
+   ═══════════════════════════════════════════════ */
+.content{padding:24px 28px 32px;display:flex;flex-direction:column;gap:18px;max-height:78vh;overflow-y:auto}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--text-4);border-radius:99px}
+.content::-webkit-scrollbar-track{background:transparent}
+
+/* ── Greeting ── */
+.greeting{display:flex;align-items:center;gap:10px}
+.greeting .icon{font-size:26px}
+.greeting h2{font-size:20px;font-weight:800;letter-spacing:-.01em}
+.greeting .sub{font-size:12px;color:var(--text-4);font-weight:500}
+
+/* ── Segmented Control ── */
+.seg-row{display:flex;justify-content:space-between;align-items:center}
+.segmented{
+  position:relative;display:inline-flex;gap:1px;
+  background:var(--surface-seg-bg);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);
+  border-radius:var(--r-pill);padding:4px;
+  border:1px solid var(--glass-border);
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.12);
+}
+.seg-indicator{
+  position:absolute;top:4px;border-radius:var(--r-pill);height:calc(100% - 8px);
+  background:var(--seg-active);
+  backdrop-filter:blur(10px) brightness(1.15);
+  -webkit-backdrop-filter:blur(10px) brightness(1.15);
+  border:1px solid rgba(139,92,246,.20);
+  box-shadow:0 2px 10px rgba(0,0,0,.18),inset 0 1px 0 rgba(255,255,255,.06);
+  transition:left .35s var(--e-out),width .35s var(--e-out);
+  pointer-events:none;z-index:0;
+}
+.seg-pill{
+  position:relative;z-index:1;border:none;background:transparent;
+  padding:8px 18px;border-radius:var(--r-pill);
+  font-size:13px;font-weight:600;color:var(--text-3);cursor:pointer;
+  transition:color .18s var(--e-out);
+}
+.seg-pill:hover{color:var(--text-2)}
+.seg-pill.active{color:var(--text-1)}
+.seg-date{font-size:12px;color:var(--text-4);font-weight:500}
+
+
+/* ── Hero Net Balance ── */
+.hero-section{text-align:center;padding:12px 0 4px}
+.hero-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-4)}
+.hero-amount{font-size:clamp(36px,6vw,52px);font-weight:800;letter-spacing:-.04em;margin:2px 0;font-variant-numeric:tabular-nums}
+.hero-change{font-size:13px;color:var(--green);font-weight:600}
+.hero-change.down{color:var(--red)}
+
+.hero-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}
+.hero-stat{
+  padding:14px 0;border-radius:var(--r-md);
+  background:var(--surface-elevated);border:1px solid var(--border-subtle);
+  text-align:center;
+}
+.hero-stat .label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4)}
+.hero-stat .value{font-size:20px;font-weight:800;margin-top:3px}
+.hero-stat .value.income{color:var(--green)}
+.hero-stat .value.expense{color:var(--red)}
+.hero-stat .value.rate{color:var(--brand)}
+
+
+/* ── Trend Chart ── */
+.section-title{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--text-4);margin-bottom:4px}
+
+.chart-card{
+  background:var(--surface-elevated);border:1px solid var(--border-subtle);
+  border-radius:var(--r-lg);padding:18px 20px;
+}
+.chart-area{min-height:160px}
+.chart-area svg{width:100%}
+
+.legend-row{display:flex;gap:16px;margin-top:8px;font-size:12px;color:var(--text-3)}
+.legend-item{display:flex;align-items:center;gap:5px}
+.legend-item::before{content:'';width:7px;height:7px;border-radius:2px}
+.legend-item.income::before{background:var(--green)}
+.legend-item.expense::before{background:var(--red)}
+
+
+/* ── 2-col Grid ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pie-card{
+  background:var(--surface-elevated);border:1px solid var(--border-subtle);
+  border-radius:var(--r-lg);padding:18px 20px;
+}
+.pie-card h3{font-size:13px;font-weight:800;margin-bottom:1px}
+.pie-card .sub{font-size:10px;color:var(--text-4);margin-bottom:8px}
+.pie-body{display:flex;align-items:center;gap:16px}
+.pie-chart{flex-shrink:0;width:100px;height:100px}
+.pie-labels{display:flex;flex-direction:column;gap:5px;flex:1}
+.pie-tag{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-3)}
+.pie-tag::before{content:'';width:7px;height:7px;border-radius:2px;flex-shrink:0}
+.pie-tag.t1::before{background:var(--chart-1)}.pie-tag.t2::before{background:var(--chart-2)}
+.pie-tag.t3::before{background:var(--chart-3)}.pie-tag.t4::before{background:var(--chart-4)}
+.pie-tag.t5::before{background:var(--chart-5)}
+.pie-tag .pct{margin-left:auto;font-weight:700;color:var(--text-2)}
+
+/* ── Transactions ── */
+.tx-item{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 0;border-bottom:1px solid var(--border-subtle);
+}
+.tx-item:last-child{border-bottom:none}
+.tx-left{display:flex;align-items:center;gap:10px}
+.tx-icon{
+  width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.tx-icon.income{background:rgba(52,211,153,.08)}
+.tx-icon.expense{background:rgba(251,113,133,.08)}
+.tx-name{font-size:13px;font-weight:700}
+.tx-note{font-size:11px;color:var(--text-4);line-height:1.3}
+.tx-right{text-align:right}
+.tx-amount{font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+.tx-amount.inc{color:var(--green)}
+.tx-amount.exp{color:var(--red)}
+.tx-time{font-size:10px;color:var(--text-4);margin-top:1px}
+
+
+/* ═══════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════ */
+@media(max-width:720px){
+  body{padding:10px}
+  .panel{border-radius:24px}
+  .topbar{padding:14px 18px 12px;flex-wrap:wrap;gap:10px}
+  .topnav{order:3;width:100%;justify-content:center}
+  .nav-btn{padding:6px 12px;font-size:11px}
+  .content{padding:18px 18px 28px;gap:14px}
+  .hero-amount{font-size:34px}
+  .hero-stats{grid-template-columns:repeat(3,1fr);gap:8px}
+  .hero-stat .value{font-size:16px}
+  .grid-2{grid-template-columns:1fr}
+  .pie-body{flex-direction:column;align-items:center;text-align:center}
+  .pie-labels{align-items:center}
+}
+
+@media(max-height:800px){
+  .content{max-height:70vh}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     NEBULA BACKGROUND — 4 dynamic color blobs
+     ═══════════════════════════════════════════════ -->
+<div class="nebula">
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
+  <div class="blob"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     THE GLASS PANEL — entire app is one floating sheet
+     ═══════════════════════════════════════════════ -->
+<div class="panel">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">R</div>
+      <div>
+        <span class="brand-name">Roadster</span>
+        <span class="brand-sub">FINANCE COPILOT</span>
+      </div>
+    </div>
+    <nav class="topnav">
+      <button class="nav-btn active">概览</button>
+      <button class="nav-btn">记账</button>
+      <button class="nav-btn">资产</button>
+      <button class="nav-btn">分析</button>
+    </nav>
+    <div class="topbar-right">
+      <div class="theme-toggle">
+        <button class="theme-btn" data-theme="dark" title="深色">🌙</button>
+        <button class="theme-btn" data-theme="light" title="浅色">☀️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- Greeting -->
+    <div class="greeting">
+      <span class="icon">👋</span>
+      <div>
+        <h2>早上好</h2>
+        <div class="sub">这是你的财务总览</div>
+      </div>
+    </div>
+
+    <!-- Segmented Control -->
+    <div class="seg-row">
+      <div class="segmented" id="periodSeg">
+        <div class="seg-indicator" id="segInd"></div>
+        <button class="seg-pill" data-period="month">本月</button>
+        <button class="seg-pill" data-period="quarter">本季</button>
+        <button class="seg-pill" data-period="year">今年</button>
+        <button class="seg-pill" data-period="all">全部</button>
+      </div>
+      <span class="seg-date">2026年7月</span>
+    </div>
+
+    <!-- Hero Net Balance -->
+    <div class="hero-section">
+      <div class="hero-label">净结余</div>
+      <div class="hero-amount">¥ 18,420.50</div>
+      <div class="hero-change">▲ 较上月 +12.4%</div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="label">收入</div>
+          <div class="value income">¥ 32,150</div>
+        </div>
+        <div class="hero-stat">
+          <div class="label">支出</div>
+          <div class="value expense">¥ 13,729.50</div>
+        </div>
+        <div class="hero-stat">
+          <div class="label">储蓄率</div>
+          <div class="value rate">57.3%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="section-title">收支走势</div>
+    <div class="chart-card">
+      <div class="chart-area">
+        <svg viewBox="0 0 600 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="35" x2="600" y2="35" stroke="var(--border-subtle)" stroke-width="1"/>
+          <line x1="0" y1="70" x2="600" y2="70" stroke="var(--border-subtle)" stroke-width="0.5"/>
+          <line x1="0" y1="105" x2="600" y2="105" stroke="var(--border-subtle)" stroke-width="1"/>
+          <defs><linearGradient id="incGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#34d399" stop-opacity="0.22"/><stop offset="100%" stop-color="#34d399" stop-opacity="0"/></linearGradient></defs>
+          <path d="M0,65 L50,62 L100,72 L150,55 L200,50 L250,60 L300,42 L350,48 L400,40 L450,38 L500,45 L550,34 L600,30 L600,120 L0,120 Z" fill="url(#incGrad)"/>
+          <path d="M0,65 L50,62 L100,72 L150,55 L200,50 L250,60 L300,42 L350,48 L400,40 L450,38 L500,45 L550,34 L600,30" stroke="#34d399" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs><linearGradient id="expGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#fb7185" stop-opacity="0.18"/><stop offset="100%" stop-color="#fb7185" stop-opacity="0"/></linearGradient></defs>
+          <path d="M0,55 L50,60 L100,52 L150,62 L200,58 L250,64 L300,56 L350,60 L400,54 L450,62 L500,58 L550,63 L600,60 L600,120 L0,120 Z" fill="url(#expGrad)"/>
+          <path d="M0,55 L50,60 L100,52 L150,62 L200,58 L250,64 L300,56 L350,60 L400,54 L450,62 L500,58 L550,63 L600,60" stroke="#fb7185" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <text x="0" y="18" fill="var(--text-4)" font-size="8" font-family="var(--font-mono)">7/1</text>
+          <text x="280" y="18" fill="var(--text-4)" font-size="8" font-family="var(--font-mono)">7/14</text>
+          <text x="575" y="18" fill="var(--text-4)" font-size="8" font-family="var(--font-mono)" text-anchor="end">今日</text>
+        </svg>
+      </div>
+      <div class="legend-row">
+        <div class="legend-item income">收入 ¥32,150</div>
+        <div class="legend-item expense">支出 ¥13,730</div>
+      </div>
+    </div>
+
+    <!-- Pie Charts -->
+    <div class="grid-2">
+      <div class="pie-card">
+        <h3>支出分类</h3>
+        <div class="sub">各类别占比</div>
+        <div class="pie-body">
+          <div class="pie-chart">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border-subtle)" stroke-width="10"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#a78bfa" stroke-width="10" stroke-dasharray="99 184" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#22d3ee" stroke-width="10" stroke-dasharray="56 226" stroke-dashoffset="-99" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#34d399" stroke-width="10" stroke-dasharray="42 240" stroke-dashoffset="-155" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#fbbf24" stroke-width="10" stroke-dasharray="28 254" stroke-dashoffset="-197" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#fb7185" stroke-width="10" stroke-dasharray="22 260" stroke-dashoffset="-225" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <text x="50" y="48" text-anchor="middle" fill="var(--text-1)" font-size="11" font-weight="800">¥13,730</text>
+              <text x="50" y="60" text-anchor="middle" fill="var(--text-4)" font-size="8">总支出</text>
+            </svg>
+          </div>
+          <div class="pie-labels">
+            <div class="pie-tag t1">餐饮<span class="pct">35%</span></div>
+            <div class="pie-tag t2">交通<span class="pct">20%</span></div>
+            <div class="pie-tag t3">购物<span class="pct">15%</span></div>
+            <div class="pie-tag t4">娱乐<span class="pct">10%</span></div>
+            <div class="pie-tag t5">其他<span class="pct">7.5%</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pie-card">
+        <h3>收入分类</h3>
+        <div class="sub">各类别占比</div>
+        <div class="pie-body">
+          <div class="pie-chart">
+            <svg viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="45" fill="none" stroke="var(--border-subtle)" stroke-width="10"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#34d399" stroke-width="10" stroke-dasharray="169 113" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#a78bfa" stroke-width="10" stroke-dasharray="71 212" stroke-dashoffset="-169" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <circle cx="50" cy="50" r="45" fill="none" stroke="#22d3ee" stroke-width="10" stroke-dasharray="28 254" stroke-dashoffset="-240" stroke-linecap="round" transform="rotate(-90 50 50)"/>
+              <text x="50" y="48" text-anchor="middle" fill="var(--text-1)" font-size="11" font-weight="800">¥32,150</text>
+              <text x="50" y="60" text-anchor="middle" fill="var(--text-4)" font-size="8">总收入</text>
+            </svg>
+          </div>
+          <div class="pie-labels">
+            <div class="pie-tag t1">工资<span class="pct">60%</span></div>
+            <div class="pie-tag t2">副业<span class="pct">25%</span></div>
+            <div class="pie-tag t3">投资<span class="pct">10%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Transactions -->
+    <div class="section-title">最近交易</div>
+    <div class="chart-card">
+      <div class="tx-item">
+        <div class="tx-left">
+          <div class="tx-icon income">🍽</div>
+          <div><div class="tx-name">餐饮报销</div><div class="tx-note">团队聚餐 · 公司报销</div></div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount inc">+ ¥ 860</div>
+          <div class="tx-time">7月7日 13:42</div>
+        </div>
+      </div>
+      <div class="tx-item">
+        <div class="tx-left">
+          <div class="tx-icon expense">🛒</div>
+          <div><div class="tx-name">超市购物</div><div class="tx-note">盒马鲜生 · 周末采购</div></div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount exp">- ¥ 328.50</div>
+          <div class="tx-time">7月6日 18:15</div>
+        </div>
+      </div>
+      <div class="tx-item">
+        <div class="tx-left">
+          <div class="tx-icon income">💼</div>
+          <div><div class="tx-name">工资收入</div><div class="tx-note">7月薪资</div></div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount inc">+ ¥ 28,500</div>
+          <div class="tx-time">7月5日 09:00</div>
+        </div>
+      </div>
+      <div class="tx-item">
+        <div class="tx-left">
+          <div class="tx-icon expense">🚇</div>
+          <div><div class="tx-name">交通出行</div><div class="tx-note">地铁月卡充值</div></div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount exp">- ¥ 200</div>
+          <div class="tx-time">7月4日 08:30</div>
+        </div>
+      </div>
+      <div class="tx-item">
+        <div class="tx-left">
+          <div class="tx-icon expense">☕</div>
+          <div><div class="tx-name">咖啡饮品</div><div class="tx-note">Manner · 燕麦拿铁</div></div>
+        </div>
+        <div class="tx-right">
+          <div class="tx-amount exp">- ¥ 25</div>
+          <div class="tx-time">7月4日 10:15</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Segmented Control ── */
+(function(){
+  const seg=document.getElementById('periodSeg');
+  const ind=document.getElementById('segInd');
+  const pills=seg.querySelectorAll('.seg-pill');
+  function move(t){ind.style.left=(t.offsetLeft-seg.offsetLeft)+'px';ind.style.width=t.offsetWidth+'px'}
+  const a=seg.querySelector('.seg-pill.active')||pills[0];
+  pills.forEach(p=>p.classList.remove('active'));a.classList.add('active');move(a);
+  pills.forEach(b=>b.addEventListener('click',function(){pills.forEach(p=>p.classList.remove('active'));this.classList.add('active');move(this)}));
+  window.addEventListener('resize',()=>{const a2=seg.querySelector('.seg-pill.active');if(a2)move(a2)});
+})();
+
+/* ── Theme Toggle ── */
+(function(){
+  const btns=document.querySelectorAll('.theme-btn');
+  const html=document.documentElement;
+  function set(t){btns.forEach(b=>b.classList.toggle('active',b.dataset.theme===t))}
+  set('dark');
+  btns.forEach(b=>b.addEventListener('click',()=>{html.setAttribute('data-theme',b.dataset.theme);set(b.dataset.theme)}));
+})();
+</script>
+</body>
+</html>
