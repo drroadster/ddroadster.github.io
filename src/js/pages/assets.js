@@ -64,7 +64,7 @@ export function render() {
     category: _normalizeCategory(a.category),
   }));
 
-  const total  = assets.reduce((s, a) => s + (a.value || 0), 0);
+  const total  = assets.reduce((s, a) => s + (Number(a.value) || 0), 0);
 
   _renderHero(total, assets.length);
   _renderTimeline();
@@ -129,7 +129,7 @@ function _renderNetworthStats(total) {
   const catTotals = {};
   assets.forEach(a => {
     const cat = _normalizeCategory(a.category);
-    catTotals[cat] = (catTotals[cat] || 0) + (a.value || 0);
+    catTotals[cat] = (catTotals[cat] || 0) + (Number(a.value) || 0);
   });
   const topCat = Object.keys(catTotals).sort((a,b) => catTotals[b] - catTotals[a])[0];
 

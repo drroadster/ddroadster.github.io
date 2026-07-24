@@ -726,8 +726,8 @@ export function upsertAsset(asset) {
 export function getAssetHistory() { return [..._history]; }
 
 export function recordSnapshot() {
-  const total = _assets.filter(a => !a.deleted).reduce((s, a) => s + (a.value || 0), 0);
-  const breakdown = Object.fromEntries(_assets.filter(a => !a.deleted).map(a => [a.id, a.value || 0]));
+  const total = _assets.filter(a => !a.deleted).reduce((s, a) => s + (Number(a.value) || 0), 0);
+  const breakdown = Object.fromEntries(_assets.filter(a => !a.deleted).map(a => [a.id, Number(a.value) || 0]));
 
   if (_history.length) {
     const last = _history[_history.length - 1];
