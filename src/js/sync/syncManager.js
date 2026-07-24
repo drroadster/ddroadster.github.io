@@ -16,7 +16,7 @@
 
 import { getCurrentUser, firebaseApp } from '../auth.js';
 import * as store from '../store.js';
-import { mergeAssetsFromCloud } from '../store.js';
+import { mergeAssetsFromCloud, mergeAssetHistoryFromCloud } from '../store.js';
 import { COLLECTIONS } from '../config.js';
 import {
   getFirestore,
@@ -32,6 +32,9 @@ let _unsubscribeTx = null;
 
 /** @type {Function|null} */
 let _unsubscribeAssets = null;
+
+/** @type {Function|null} */
+let _unsubscribeAssetHistory = null;
 
 /** 重复检测 SHA1 摘要 */
 async function _sha1(str) {
@@ -64,6 +67,9 @@ function _createAdapter(uid) {
     },
     deleteAsset: async (id) => {
       await deleteDoc(doc(_db, COLLECTIONS.assets(uid), id));
+    },
+    writeAssetHistory: async (snapshots) => {
+      await setDoc(doc(_db, COLLECTIONS.asset_history(uid)), { snapshots });
     },
   };
 }
@@ -100,6 +106,19 @@ export function initSyncListeners(uid, onData, onAssetsData) {
   }, (err) => {
     console.error('[syncManager] assets onSnapshot 错误:', err);
   });
+
+  // 监听资产历史（单文档）
+  const historyDocRef = doc(_db, COLLECTIONS.asset_history(uid));
+  _unsubscribeAssetHistory = onSnapshot(historyDocRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.snapshots && Array.isArray(data.snapshots)) {
+        mergeAssetHistoryFromCloud(data.snapshots);
+      }
+    }
+  }, (err) => {
+    console.error('[syncManager] asset_history onSnapshot 错误:', err);
+  });
 }
 
 /**
@@ -113,6 +132,10 @@ export function stopSyncListeners() {
   if (_unsubscribeAssets) {
     _unsubscribeAssets();
     _unsubscribeAssets = null;
+  }
+  if (_unsubscribeAssetHistory) {
+    _unsubscribeAssetHistory();
+    _unsubscribeAssetHistory = null;
   }
   console.log('[syncManager] onSnapshot 监听已停止');
 }

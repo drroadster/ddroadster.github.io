@@ -27,6 +27,8 @@ export const COLLECTIONS = {
   assets: (uid) => `users/${uid}/assets`,
   /** users/{uid}/settings */
   settings: (uid) => `users/${uid}/settings`,
+  /** users/{uid}/data/asset_history — 资产历史快照（单文档） */
+  asset_history: (uid) => `users/${uid}/data/asset_history`,
   /** Firestore doc/collection 构造辅助 */
   userDoc: (uid, collection, itemId) => `users/${uid}/${collection}/${itemId}`,
 };

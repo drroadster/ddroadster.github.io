@@ -725,6 +725,23 @@ export function upsertAsset(asset) {
 /** @returns {Snapshot[]} */
 export function getAssetHistory() { return [..._history]; }
 
+/**
+ * 合并云端资产历史快照到内存。
+ * 按 ts 去重合并（云端优先覆盖同时间戳的本地数据）。
+ * @param {Snapshot[]} cloudSnapshots
+ */
+export function mergeAssetHistoryFromCloud(cloudSnapshots) {
+  if (!Array.isArray(cloudSnapshots) || cloudSnapshots.length === 0) return;
+
+  const localMap = new Map(_history.map(h => [h.ts, h]));
+  for (const s of cloudSnapshots) {
+    if (s.ts) localMap.set(s.ts, s);
+  }
+  _history = [...localMap.values()].sort((a, b) => a.ts.localeCompare(b.ts));
+  _persist(LS.ASSET_HISTORY, _history);
+  _emit('history');
+}
+
 export function recordSnapshot() {
   const total = _assets.filter(a => !a.deleted).reduce((s, a) => s + (Number(a.value) || 0), 0);
   const breakdown = Object.fromEntries(_assets.filter(a => !a.deleted).map(a => [a.id, Number(a.value) || 0]));
@@ -746,6 +763,11 @@ export function recordSnapshot() {
   _history.sort((a, b) => a.ts.localeCompare(b.ts));
   _persist(LS.ASSET_HISTORY, _history);
   _emit('history');
+
+  // 云端同步
+  if (_syncAdapter && _syncAdapter.writeAssetHistory) {
+    _syncAdapter.writeAssetHistory(_history).catch(e => console.warn('[store] 资产历史云端同步失败:', e));
+  }
 }
 
 export function importAssetSnapshots(snaps) {

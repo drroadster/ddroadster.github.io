@@ -3325,6 +3325,8 @@ var init_config = __esm({
       assets: (uid2) => `users/${uid2}/assets`,
       /** users/{uid}/settings */
       settings: (uid2) => `users/${uid2}/settings`,
+      /** users/{uid}/data/asset_history — 资产历史快照（单文档） */
+      asset_history: (uid2) => `users/${uid2}/data/asset_history`,
       /** Firestore doc/collection 构造辅助 */
       userDoc: (uid2, collection2, itemId) => `users/${uid2}/${collection2}/${itemId}`
     };
@@ -4237,6 +4239,16 @@ function upsertAsset(asset) {
 function getAssetHistory() {
   return [..._history];
 }
+function mergeAssetHistoryFromCloud(cloudSnapshots) {
+  if (!Array.isArray(cloudSnapshots) || cloudSnapshots.length === 0) return;
+  const localMap = new Map(_history.map((h) => [h.ts, h]));
+  for (const s of cloudSnapshots) {
+    if (s.ts) localMap.set(s.ts, s);
+  }
+  _history = [...localMap.values()].sort((a, b) => a.ts.localeCompare(b.ts));
+  _persist(LS.ASSET_HISTORY, _history);
+  _emit("history");
+}
 function recordSnapshot() {
   const total = _assets.filter((a) => !a.deleted).reduce((s, a) => s + (Number(a.value) || 0), 0);
   const breakdown = Object.fromEntries(_assets.filter((a) => !a.deleted).map((a) => [a.id, Number(a.value) || 0]));
@@ -4253,6 +4265,9 @@ function recordSnapshot() {
   _history.sort((a, b) => a.ts.localeCompare(b.ts));
   _persist(LS.ASSET_HISTORY, _history);
   _emit("history");
+  if (_syncAdapter && _syncAdapter.writeAssetHistory) {
+    _syncAdapter.writeAssetHistory(_history).catch((e) => console.warn("[store] \u8D44\u4EA7\u5386\u53F2\u4E91\u7AEF\u540C\u6B65\u5931\u8D25:", e));
+  }
 }
 function importAssetSnapshots(snaps) {
   let added = 0;
@@ -9243,6 +9258,7 @@ import {
 var _db = getFirestore(_app);
 var _unsubscribeTx = null;
 var _unsubscribeAssets = null;
+var _unsubscribeAssetHistory = null;
 function _createAdapter(uid2) {
   return {
     writeTx: async (id, data) => {
@@ -9258,6 +9274,9 @@ function _createAdapter(uid2) {
     },
     deleteAsset: async (id) => {
       await deleteDoc(doc(_db, COLLECTIONS.assets(uid2), id));
+    },
+    writeAssetHistory: async (snapshots) => {
+      await setDoc(doc(_db, COLLECTIONS.asset_history(uid2)), { snapshots });
     }
   };
 }
@@ -9279,6 +9298,17 @@ function initSyncListeners(uid2, onData, onAssetsData) {
   }, (err) => {
     console.error("[syncManager] assets onSnapshot \u9519\u8BEF:", err);
   });
+  const historyDocRef = doc(_db, COLLECTIONS.asset_history(uid2));
+  _unsubscribeAssetHistory = onSnapshot(historyDocRef, (docSnap) => {
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      if (data.snapshots && Array.isArray(data.snapshots)) {
+        mergeAssetHistoryFromCloud(data.snapshots);
+      }
+    }
+  }, (err) => {
+    console.error("[syncManager] asset_history onSnapshot \u9519\u8BEF:", err);
+  });
 }
 function stopSyncListeners() {
   if (_unsubscribeTx) {
@@ -9288,6 +9318,10 @@ function stopSyncListeners() {
   if (_unsubscribeAssets) {
     _unsubscribeAssets();
     _unsubscribeAssets = null;
+  }
+  if (_unsubscribeAssetHistory) {
+    _unsubscribeAssetHistory();
+    _unsubscribeAssetHistory = null;
   }
   console.log("[syncManager] onSnapshot \u76D1\u542C\u5DF2\u505C\u6B62");
 }
