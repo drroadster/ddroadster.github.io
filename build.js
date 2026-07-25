@@ -46,38 +46,16 @@ try {
 }
 
 // ── Step 1: bundle JS (resolves ESM imports/exports) ──
-log('Bundling JavaScript (src/js/main.js → single IIFE)...');
+log('Bundling JavaScript (src/js/main.js → ESM)...');
 
-const jsResult = esbuild.buildSync({
-  entryPoints: [path.join(ROOT, 'src/js/main.js')],
-  bundle: true,
-  format: 'iife',           // classic <script>, no type=module needed
-  target: ['es2020'],
-  write: false,
-  // Firebase modules are resolved via the browser's native importmap
-  // (see index.html) — esbuild must NOT try to bundle them itself.
-  external: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
-  logLevel: 'warning',
-});
-
-if (jsResult.errors.length) {
-  fail('esbuild reported errors:\n' + jsResult.errors.map(e => e.text).join('\n'));
-}
-
-let bundledJs = jsResult.outputFiles[0].text;
-
-// esbuild's IIFE format can't leave `import` statements as external
-// references inside an IIFE (browsers would reject `import` inside a
-// non-module script). The clean fix: emit format:'esm' instead, and
-// load the bundle itself via <script type="module">. We don't need a
-// classic script — the only reason to avoid type=module was Safari
-// <16.4 support for importmap, which is no longer a real constraint.
-// Re-run with esm format:
+// Build with esm format so top-level await in auth.js works.
+// The bundle is loaded via <script type="module">, and Firebase
+// imports are resolved via the browser's native importmap.
 const jsResultEsm = esbuild.buildSync({
   entryPoints: [path.join(ROOT, 'src/js/main.js')],
   bundle: true,
   format: 'esm',
-  target: ['es2020'],
+  target: ['es2022'],
   write: false,
   external: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
   logLevel: 'warning',
@@ -85,7 +63,7 @@ const jsResultEsm = esbuild.buildSync({
 if (jsResultEsm.errors.length) {
   fail('esbuild (esm) reported errors:\n' + jsResultEsm.errors.map(e => e.text).join('\n'));
 }
-bundledJs = jsResultEsm.outputFiles[0].text;
+const bundledJs = jsResultEsm.outputFiles[0].text;
 
 log(`  → ${(bundledJs.length / 1024).toFixed(1)} KB`);
 

@@ -9165,7 +9165,7 @@ import {
 } from "firebase/auth";
 var _app = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
 var _auth = getAuth(_app);
-setPersistence(_auth, browserLocalPersistence);
+await setPersistence(_auth, browserLocalPersistence);
 var _user = null;
 var _subscribers2 = /* @__PURE__ */ new Set();
 onAuthStateChanged(_auth, (user) => {

@@ -41,7 +41,11 @@ const _app  = getApps().length ? getApps()[0] : initializeApp(FIREBASE_CONFIG);
 // fire-and-forget here because sign-in only happens on user click,
 // which always occurs well after this module has loaded.
 const _auth = getAuth(_app);
-setPersistence(_auth, browserLocalPersistence);
+// Must await setPersistence before registering onAuthStateChanged —
+// otherwise onAuthStateChanged may fire before persistence is fully
+// configured and return null, failing to restore the session from
+// IndexedDB (login state appears to expire immediately).
+await setPersistence(_auth, browserLocalPersistence);
 
 // Export the app instance so db.js can reuse it.
 export { _app as firebaseApp };
