@@ -1,18 +1,22 @@
 // ═══════════════════════════════════════════════════════
-//  ROADSTER v2.0 · pages/overview.js
-//  Overview page: greeting, net balance hero, trend chart,
-//  category lists, recent transactions list.
+//  ROADSTER v3.0 · pages/overview.js
+//  Monthly Analysis Page — iOS-style minimal design
+//  Features: period tabs, expense/income toggle, bar chart,
+//  calendar grid, category breakdown, bottom nav
 // ═══════════════════════════════════════════════════════
 
 import { getTransactions, filterByPeriod, summarise, catTotals } from '../store.js';
-import { buildLineChart, cssVar, hexToRgba, palette } from '../charts.js';
+import { buildVertBar, cssVar, hexToRgba, palette } from '../charts.js';
 import { fmt, fmtK, esc, formatTxDateTime, pad2 } from '../utils.js';
-import { t } from '../i18n.js';
 import { onNavigate } from '../router.js';
-import { CAT_ICONS, getCatIcon } from '../config.js';
+import { getCatIcon } from '../config.js';
 
-let _period = 'month';
-let _catDetailData = {};   // { categoryName: { transactions: [...], total: number, pct: number } }
+// ── State ──────────────────────────────────────────────
+let _period = 'month';          // 'week' | 'month' | 'year'
+let _type = 'expense';          // 'expense' | 'income'
+let _selectedYear = new Date().getFullYear();
+let _selectedMonth = new Date().getMonth() + 1; // 1-12
+let _catDetailData = {};
 let _catDetailSort = 'time';
 
 // ── Public init ────────────────────────────────────────
@@ -21,201 +25,92 @@ export function initOverviewPage() {
   onNavigate(page => { if (page === 'overview') render(); });
 }
 
-/** Re-render (called externally after data import / theme change). */
+/** Re-render. */
 export function render() {
-  _setGreeting();
   const all = getTransactions();
-  const txs = filterByPeriod(_period, all);
-  const { income, expense, net, saveRate } = summarise(txs);
+  const txs = _getFilteredTxs(all);
 
-  let mom = null;
-  if (_period === 'month') mom = _computeMoM(all);
-
-  _renderHero(net, txs.length);
-  _renderHeroStats(income, expense, saveRate, mom);
-  _renderTrendChart(txs);
-  _renderPies(txs);
+  _renderHero(txs);
+  _renderBarChart(all);
+  _renderCalendar(all);
+  _renderCategories(txs);
   _renderRecent(txs);
 }
 
-// ── Controls (period segmented buttons) ────────────────
+// ── Filter transactions by current state ───────────────
+function _getFilteredTxs(all) {
+  return all.filter(tx => {
+    if (tx.deleted) return false;
+    const d = new Date(tx.date);
+    if (tx.type !== (_type === 'expense' ? '支出' : '收入')) return false;
+    if (_period === 'month')
+      return d.getFullYear() === _selectedYear && (d.getMonth() + 1) === _selectedMonth;
+    if (_period === 'week') {
+      const now = new Date();
+      const startOfWeek = new Date(now);
+      startOfWeek.setDate(now.getDate() - now.getDay());
+      startOfWeek.setHours(0, 0, 0, 0);
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 7);
+      return d >= startOfWeek && d < endOfWeek;
+    }
+    if (_period === 'year')
+      return d.getFullYear() === _selectedYear;
+    return false;
+  });
+}
+
+// ── Controls wiring ────────────────────────────────────
 function _wireControls() {
-  document.querySelectorAll('#periodSeg .seg-pill').forEach(btn => {
+  // Period tabs
+  document.querySelectorAll('#ovPeriodTabs .ov-period-tab').forEach(btn => {
     btn.addEventListener('click', () => {
       _period = btn.dataset.period;
-      document.querySelectorAll('#periodSeg .seg-pill').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('#ovPeriodTabs .ov-period-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      _syncMonthSelectorVisibility();
+      render();
+    });
+  });
+
+  // Type toggle
+  document.querySelectorAll('#ovTypeToggle .ov-type-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _type = btn.dataset.type;
+      document.querySelectorAll('#ovTypeToggle .ov-type-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       render();
     });
   });
-}
 
-// ── Greeting ────────────────────────────────────────────
-function _setGreeting() {
-  const el = document.getElementById('greetingText');
-  if (!el) return;
-  const h = new Date().getHours();
-  let key = 'overviewGreetMorning';
-  if (h >= 12 && h < 14) key = 'overviewGreetNoon';
-  else if (h >= 14 && h < 18) key = 'overviewGreetAfternoon';
-  else if (h >= 18 && h < 23) key = 'overviewGreetEvening';
-  else if (h >= 23 || h < 5)  key = 'overviewGreetLate';
-  el.textContent = t(key);
-}
-
-// ── Hero ────────────────────────────────────────────────
-function _renderHero(net, count) {
-  const valEl = document.getElementById('netAmount');
-  const subEl = document.getElementById('netSub');
-  if (valEl) valEl.textContent = `${net >= 0 ? '+' : '−'}¥${fmt(Math.abs(net))}`;
-  if (subEl) {
-    const label = { month: t('periodMonth'), quarter: t('periodQuarter'),
-                     year: t('periodYear'), all: t('periodAll') }[_period];
-    subEl.textContent = count ? `${count} 笔交易 · ${label}` : '暂无数据';
-  }
-}
-function _renderHeroStats(income, expense, saveRate, mom) {
-  const incEl  = document.getElementById('heroIncome');
-  const expEl  = document.getElementById('heroExpense');
-  const rateEl = document.getElementById('heroSaveRate');
-
-  function _momHtml(cur, prev) {
-    if (prev === null || prev === undefined || prev === 0) return '';
-    const pct = ((cur - prev) / Math.abs(prev)) * 100;
-    if (!isFinite(pct)) return '';
-    const up = pct >= 0;
-    return ` <span class="hero-stat-mom ${up ? 'up' : 'down'}">${up ? '↑' : '↓'}${Math.abs(pct).toFixed(1)}%</span>`;
+  // Month picker
+  const monthPicker = document.getElementById('ovMonthPicker');
+  if (monthPicker) {
+    monthPicker.addEventListener('change', () => {
+      const [y, m] = monthPicker.value.split('-').map(Number);
+      _selectedYear = y;
+      _selectedMonth = m;
+      render();
+    });
   }
 
-  if (incEl) {
-    incEl.innerHTML = `¥${fmt(income)}${mom ? _momHtml(income, mom.income) : ''}`;
-  }
-  if (expEl) {
-    expEl.innerHTML = `¥${fmt(expense)}${mom ? _momHtml(expense, mom.expense) : ''}`;
-  }
-  if (rateEl) {
-    const currRate = saveRate !== null ? saveRate : null;
-    const prevRate = mom && mom.saveRate !== null ? mom.saveRate : null;
-    let momPart = '';
-    if (currRate !== null && prevRate !== null && prevRate !== 0) {
-      const pctDiff = (currRate - prevRate) * 100;
-      if (isFinite(pctDiff)) {
-        const up = pctDiff >= 0;
-        momPart = ` <span class="hero-stat-mom ${up ? 'up' : 'down'}">${up ? '↑' : '↓'}${Math.abs(pctDiff).toFixed(1)}pp</span>`;
-      }
-    }
-    rateEl.innerHTML = `${currRate !== null ? Math.round(currRate * 100) + '%' : '—'}${momPart}`;
-  }
-}
-
-// ── Month-over-Month helper ────────────────────────────
-function _getPrevMonthTxs(allTxs) {
-  const now = new Date();
-  let pm = now.getMonth() - 1;
-  let py = now.getFullYear();
-  if (pm < 0) { pm = 11; py--; }
-  return allTxs.filter(t => {
-    if (t.deleted) return false;
-    const d = new Date(t.date);
-    return d.getFullYear() === py && d.getMonth() === pm;
-  });
-}
-
-function _computeMoM(allTxs) {
-  const prevTxs = _getPrevMonthTxs(allTxs);
-  if (!prevTxs.length) return null;
-  return summarise(prevTxs);
-}
-
-// ── Trend chart (granularity adapts to period) ─────────
-function _renderTrendChart(txs) {
-  const canvas   = document.getElementById('trendChart');
-  const emptyEl  = document.getElementById('trendEmpty');
-  if (!canvas) return;
-
-  if (!txs.length) {
-    canvas.style.display = 'none';
-    if (emptyEl) emptyEl.style.display = '';
-    return;
-  }
-  canvas.style.display = '';
-  if (emptyEl) emptyEl.style.display = 'none';
-
-  // Granularity: month period → daily buckets; quarter → weekly; year/all → monthly
-  const granularity = _period === 'month' ? 'day' : _period === 'quarter' ? 'week' : 'month';
-
-  const groups = {};
-  function bucketKey(d) {
-    if (granularity === 'day') return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-    if (granularity === 'week') {
-      const first = new Date(d.getFullYear(), 0, 1);
-      const days  = Math.floor((d - first) / 86400000);
-      const week  = Math.ceil((days + first.getDay() + 1) / 7);
-      return `${d.getFullYear()}-W${pad2(week)}`;
-    }
-    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
-  }
-  function bucketLabel(key, d) {
-    if (granularity === 'day')  return `${d.getMonth() + 1}/${d.getDate()}`;
-    if (granularity === 'week') return key.split('-W')[1] + '周';
-    return key;
+  // Calendar toggle
+  const calToggle = document.getElementById('ovCalToggle');
+  if (calToggle) {
+    calToggle.addEventListener('click', () => {
+      const grid = document.getElementById('ovCalGrid');
+      const toggle = document.getElementById('ovCalToggle');
+      if (!grid || !toggle) return;
+      const expanded = grid.classList.toggle('expanded');
+      toggle.innerHTML = expanded ? '收起全部 ∧' : '展开全部 ∨';
+    });
   }
 
-  txs.forEach(tx => {
-    const d = new Date(tx.date);
-    const k = bucketKey(d);
-    if (!groups[k]) groups[k] = { income: 0, expense: 0, label: bucketLabel(k, d) };
-    if (tx.type === '收入') groups[k].income += tx.amount;
-    else                    groups[k].expense += tx.amount;
-  });
-
-  let labels, incomeData, expenseData;
-
-  if (granularity === 'day') {
-    // Fill in missing days for a continuous curve
-    const sortedKeys = Object.keys(groups).sort();
-    const first = new Date(sortedKeys[0]);
-    const last  = new Date(sortedKeys[sortedKeys.length - 1]);
-    labels = []; incomeData = []; expenseData = [];
-    for (let d = new Date(first); d <= last; d.setDate(d.getDate() + 1)) {
-      const k = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
-      labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
-      incomeData.push(groups[k]?.income ?? 0);
-      expenseData.push(groups[k]?.expense ?? 0);
-    }
-  } else {
-    const sortedKeys = Object.keys(groups).sort();
-    labels      = sortedKeys.map(k => groups[k].label);
-    incomeData  = sortedKeys.map(k => groups[k].income);
-    expenseData = sortedKeys.map(k => groups[k].expense);
-  }
-
-  buildLineChart('trendChart', labels, [
-    { label: t('totalIncome'),  data: incomeData,  color: cssVar('--color-green'), fill: true },
-    { label: t('totalExpense'), data: expenseData, color: cssVar('--color-red'),   fill: true, fillAlpha: 0.08 },
-  ]);
-}
-
-// ── Category lists (replaces Chart.js doughnuts) ──────
-function _renderPies(txs) {
-  const expCats = catTotals(txs, '支出');
-  const incCats = catTotals(txs, '收入');
-  const hasData = Object.values(expCats).some(v => v > 0) || Object.values(incCats).some(v => v > 0);
-
-  const section = document.getElementById('pieSection');
-  if (section) section.style.display = hasData ? '' : 'none';
-  if (!hasData) return;
-
-  _catDetailData = {};
-  _buildCatList('expenseLegend', expCats, txs, '支出');
-  _buildCatList('incomeLegend',  incCats,  txs, '收入');
-
-  // Wire sheet overlay close
+  // Category detail overlay
   const overlay = document.getElementById('catDetailOverlay');
   if (overlay) {
     overlay.onclick = e => { if (e.target === overlay) _closeCatDetail(); };
   }
-  // Wire sort segmented control
   document.querySelectorAll('#catDetailSortSeg .seg-pill').forEach(btn => {
     btn.onclick = () => {
       _catDetailSort = btn.dataset.sort;
@@ -226,48 +121,229 @@ function _renderPies(txs) {
   });
 }
 
-function _buildCatList(legendId, catMap, allTxs, type) {
+function _syncMonthSelectorVisibility() {
+  const selector = document.getElementById('ovMonthSelector');
+  if (!selector) return;
+  selector.style.display = (_period === 'week') ? 'none' : '';
+  if (_period === 'month') _buildMonthDropdown();
+  if (_period === 'year') _buildYearDropdown();
+}
+
+function _buildMonthDropdown() {
+  const sel = document.getElementById('ovMonthPicker');
+  if (!sel) return;
+  const now = new Date();
+  const cy = now.getFullYear(), cm = now.getMonth() + 1;
+  let html = '';
+  for (let y = cy - 2; y <= cy; y++) {
+    for (let m = 1; m <= 12; m++) {
+      if (y === cy && m > cm) continue;
+      const val = `${y}-${pad2(m)}`;
+      const label = `${y}年${m}月`;
+      const selected = (y === _selectedYear && m === _selectedMonth) ? ' selected' : '';
+      html += `<option value="${val}"${selected}>${label}</option>`;
+    }
+  }
+  sel.innerHTML = html;
+}
+
+function _buildYearDropdown() {
+  const sel = document.getElementById('ovMonthPicker');
+  if (!sel) return;
+  const cy = new Date().getFullYear();
+  let html = '';
+  for (let y = cy - 3; y <= cy; y++) {
+    const selected = (y === _selectedYear) ? ' selected' : '';
+    html += `<option value="${y}-01"${selected}>${y}年</option>`;
+  }
+  sel.innerHTML = html;
+}
+
+// ── Hero / summary line ────────────────────────────────
+function _renderHero(txs) {
+  const total = txs.reduce((s, tx) => s + tx.amount, 0);
+  const el = document.getElementById('ovMonthTotal');
+  const lbl = document.getElementById('ovMonthLabel');
+  if (el) el.textContent = `¥${fmt(total)}`;
+  if (lbl) {
+    const typeLabel = _type === 'expense' ? '总支出' : '总收入';
+    if (_period === 'month') {
+      lbl.textContent = `${_selectedYear}年${_selectedMonth}月${typeLabel}`;
+    } else if (_period === 'week') {
+      lbl.textContent = `本周${typeLabel}`;
+    } else {
+      lbl.textContent = `${_selectedYear}年${typeLabel}`;
+    }
+  }
+}
+
+// ── Bar Chart (monthly summary) ────────────────────────
+function _renderBarChart(all) {
+  const canvas = document.getElementById('ovBarChart');
+  const emptyEl = document.getElementById('ovBarEmpty');
+  if (!canvas) return;
+
+  const activeTxs = all.filter(tx => !tx.deleted && tx.type === (_type === 'expense' ? '支出' : '收入'));
+
+  if (!activeTxs.length) {
+    canvas.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  canvas.style.display = '';
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // Group by month for the last N months based on period context
+  let monthsToShow = 5;
+  if (_period === 'year') monthsToShow = 12;
+
+  // Build month buckets for the selected year (or recent months)
+  const now = new Date();
+  const refYear = _period === 'year' ? _selectedYear : now.getFullYear();
+  const refMonth = _period === 'year' ? 12 : now.getMonth() + 1;
+
+  const monthBuckets = [];
+  for (let i = monthsToShow - 1; i >= 0; i--) {
+    let m = refMonth - i;
+    let y = refYear;
+    while (m <= 0) { m += 12; y--; }
+    monthBuckets.push({ year: y, month: m, total: 0 });
+  }
+
+  activeTxs.forEach(tx => {
+    const d = new Date(tx.date);
+    const bucket = monthBuckets.find(b => b.year === d.getFullYear() && b.month === (d.getMonth() + 1));
+    if (bucket) bucket.total += tx.amount;
+  });
+
+  const labels = monthBuckets.map(b => `${b.month}月`);
+  const data = monthBuckets.map(b => b.total);
+  const avg = data.reduce((s, v) => s + v, 0) / (data.filter(v => v > 0).length || 1);
+  const barColor = _type === 'expense' ? '#A0C4F0' : '#A0E8C8';
+  const colors = data.map(() => barColor);
+
+  // Set avg reference line via annotation or just show as text
+  document.getElementById('ovAvgLine').textContent = `月${_type === 'expense' ? '支出' : '收入'}均值 ¥${fmt(avg)}`;
+
+  buildVertBar('ovBarChart', labels, data, colors);
+}
+
+// ── Calendar Grid ──────────────────────────────────────
+function _renderCalendar(all) {
+  const grid = document.getElementById('ovCalGrid');
+  if (!grid) return;
+
+  let year = _selectedYear, month = _selectedMonth;
+  if (_period === 'week') {
+    const now = new Date();
+    year = now.getFullYear();
+    month = now.getMonth() + 1;
+  }
+
+  const txs = all.filter(tx => {
+    if (tx.deleted) return false;
+    if (tx.type !== (_type === 'expense' ? '支出' : '收入')) return false;
+    const d = new Date(tx.date);
+    return d.getFullYear() === year && (d.getMonth() + 1) === month;
+  });
+
+  // Build daily totals
+  const dailyMap = {};
+  txs.forEach(tx => {
+    const d = new Date(tx.date);
+    const day = d.getDate();
+    dailyMap[day] = (dailyMap[day] || 0) + tx.amount;
+  });
+
+  // Calendar construction
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+  const totalDays = lastDay.getDate();
+  const startDow = firstDay.getDay(); // 0=Sunday
+
+  const today = new Date();
+  const isCurrentMonth = (today.getFullYear() === year && today.getMonth() === month - 1);
+  const todayDate = today.getDate();
+
+  let cells = '';
+  // Empty cells before first day
+  for (let i = 0; i < startDow; i++) {
+    cells += '<div class="ov-cal-cell ov-cal-cell--empty"></div>';
+  }
+  // Day cells
+  for (let d = 1; d <= totalDays; d++) {
+    const amount = dailyMap[d] || 0;
+    const isToday = isCurrentMonth && d === todayDate;
+    const cls = isToday ? ' ov-cal-cell--today' : '';
+    const amountStr = dailyMap[d] !== undefined ? `¥${fmtK(amount)}` : '-';
+    const dayLabel = isToday ? '今天' : d;
+    cells += `<div class="ov-cal-cell${cls}">
+      <span class="ov-cal-day">${dayLabel}</span>
+      <span class="ov-cal-amount">${amountStr}</span>
+    </div>`;
+  }
+
+  grid.innerHTML = cells;
+}
+
+// ── Category Breakdown ─────────────────────────────────
+function _renderCategories(txs) {
+  const catMap = catTotals(txs, _type === 'expense' ? '支出' : '收入');
   const sorted = Object.entries(catMap)
     .filter(([, v]) => v > 0)
     .sort((a, b) => b[1] - a[1]);
 
-  const total = sorted.reduce((s, [, v]) => s + v, 0);
-  const colors = palette();
-
-  const legEl = document.getElementById(legendId);
-  if (!legEl) return;
+  const container = document.getElementById('ovCatBreakdown');
+  if (!container) return;
 
   if (!sorted.length) {
-    legEl.innerHTML = '<div style="font-size:12px;color:var(--color-label-4);padding:8px 0">暂无数据</div>';
+    container.innerHTML = '<div style="font-size:12px;color:var(--color-label-4);padding:8px 0;text-align:center">暂无数据</div>';
     return;
   }
 
-  legEl.className = 'cat-list';
+  const total = sorted.reduce((s, [, v]) => s + v, 0);
+  const colors = palette();
 
-  // Store data for detail sheet
+  // Find top category and most changed
+  const topCat = sorted[0][0];
+  // For "most changed" we'd need last month data, approximate with a note
+  const summaryText = `<b>${topCat}</b>分类消费占比最高`;
+
+  document.getElementById('ovCatSummary').innerHTML = summaryText;
+
+  // Store data for detail
+  _catDetailData = {};
   sorted.forEach(([name, val]) => {
-    const txsOfCat = allTxs.filter(tx => tx.category === name && tx.type === type);
     _catDetailData[name] = {
-      transactions: txsOfCat,
+      transactions: txs.filter(tx => tx.category === name && tx.type === (_type === 'expense' ? '支出' : '收入')),
       total: val,
       pct: total > 0 ? ((val / total) * 100).toFixed(1) : 0,
     };
   });
 
-  legEl.innerHTML = sorted.map(([name, val], i) => {
-    const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+  // Render progress bars
+  container.innerHTML = sorted.map(([name, val], i) => {
+    const pct = total > 0 ? (val / total) * 100 : 0;
     const color = colors[i % colors.length];
     const icon = getCatIcon(name);
-    return `<div class="cat-list-row" data-cat-name="${esc(name)}">
-      <div class="cat-list-icon" style="background:${color}22;color:${color}">${icon}</div>
-      <span class="cat-list-name">${esc(name)}</span>
-      <span class="cat-list-amount">¥${fmt(val)}</span>
-      <span class="cat-list-pct">${pct}%</span>
+    const pctStr = pct.toFixed(1) + '%';
+    return `<div class="ov-cat-row" data-cat-name="${esc(name)}">
+      <div class="ov-cat-icon" style="background:${color}22;color:${color}">${icon}</div>
+      <div class="ov-cat-info">
+        <div class="ov-cat-name">${esc(name)}</div>
+        <div class="ov-cat-bar-track">
+          <div class="ov-cat-bar-fill" style="width:${pct}%;background:${color}"></div>
+        </div>
+      </div>
+      <div class="ov-cat-right">
+        <div class="ov-cat-amount">¥${fmt(val)}</div>
+        <div class="ov-cat-pct">${pctStr}</div>
+      </div>
     </div>`;
   }).join('');
 
   // Wire click handlers
-  legEl.querySelectorAll('.cat-list-row').forEach(row => {
+  container.querySelectorAll('.ov-cat-row').forEach(row => {
     row.addEventListener('click', () => _openCatDetail(row.dataset.catName));
   });
 }
@@ -283,7 +359,6 @@ function _openCatDetail(catName) {
 
   titleEl.textContent = `${catName} · ¥${fmt(data.total)} (${data.pct}%)`;
   _catDetailSort = 'time';
-  // Reset sort pill
   document.querySelectorAll('#catDetailSortSeg .seg-pill').forEach(b => {
     b.classList.toggle('active', b.dataset.sort === 'time');
   });
@@ -306,8 +381,6 @@ function _renderCatDetail() {
   if (!listEl || !data) return;
 
   let txs = [...data.transactions];
-
-  // Sort
   switch (_catDetailSort) {
     case 'amount-desc': txs.sort((a, b) => b.amount - a.amount); break;
     case 'amount-asc':  txs.sort((a, b) => a.amount - b.amount);  break;
@@ -325,7 +398,6 @@ function _renderCatDetail() {
     const icon = getCatIcon(tx.category);
     const timeDisplay = formatTxDateTime(tx.date);
     const amountCls = isGain ? 'income' : 'expense';
-
     return `<div class="cat-detail-row">
       <div class="cat-detail-icon" style="background:${color}18;color:${color}">${icon}</div>
       <div class="cat-detail-info">
@@ -337,17 +409,15 @@ function _renderCatDetail() {
   }).join('');
 }
 
-// ── Recent transactions list ──────────────────────────
+// ── Recent transactions ────────────────────────────────
 function _renderRecent(txs) {
   const el = document.getElementById('recentTxList');
   if (!el) return;
   const recent = [...txs].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
   el.innerHTML = recent.length
     ? recent.map(_txRowHtml).join('')
-    : `<div class="empty-state"><div class="empty-icon">📋</div>
-         <div class="empty-text">还没有交易记录<br>点击右下角「＋」开始记录</div></div>`;
+    : '<div class="empty-state"><div class="empty-icon">📋</div><div class="empty-text">还没有交易记录<br>点击右下角「＋」开始记录</div></div>';
 
-  // Wire click handlers to open detail (deferred import to avoid cycle)
   el.querySelectorAll('[data-tx-id]').forEach(row => {
     row.addEventListener('click', () => {
       import('./transactions.js').then(m => m.openTxDetail(row.dataset.txId));
@@ -356,21 +426,17 @@ function _renderRecent(txs) {
 }
 
 function _txRowHtml(tx) {
-  const isLoss = tx.type === '收入' && tx.amount < 0;
-  const isGain = tx.type === '收入' && tx.amount >= 0;
-  const sign   = isLoss ? '−' : (isGain ? '+' : '−');
-  const cls    = isGain ? 'income' : (isLoss ? 'loss' : '');
-  const bg     = isGain
+  const isGain = tx.type === '收入';
+  const sign = isGain ? '+' : '−';
+  const cls = isGain ? 'income' : '';
+  const bg = isGain
     ? 'linear-gradient(135deg,rgba(52,199,89,.16),rgba(0,199,190,.16))'
-    : isLoss
-      ? 'linear-gradient(135deg,rgba(255,59,48,.16),rgba(255,149,0,.12))'
-      : 'linear-gradient(135deg,rgba(0,122,255,.14),rgba(175,82,222,.14))';
-  const icon = isLoss ? '📉' : (getCatIcon(tx.category));
-
+    : 'linear-gradient(135deg,rgba(0,122,255,.14),rgba(175,82,222,.14))';
+  const icon = getCatIcon(tx.category);
   return `<div class="tx-row" data-tx-id="${tx.id}">
     <div class="tx-icon" style="background:${bg}">${icon}</div>
     <div class="tx-info">
-      <div class="tx-name">${esc(tx.category)}${tx.note ? ' · ' + esc(tx.note) : ''}${isLoss ? ' · 亏损' : ''}</div>
+      <div class="tx-name">${esc(tx.category)}${tx.note ? ' · ' + esc(tx.note) : ''}</div>
       <div class="tx-meta">${formatTxDateTime(tx.date)}</div>
     </div>
     <div class="tx-amount ${cls}">${sign}¥${fmt(Math.abs(tx.amount))}</div>
