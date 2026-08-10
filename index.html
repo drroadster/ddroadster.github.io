@@ -245,6 +245,328 @@
 #page-fire .list-row:hover .list-del{opacity:1;}
 #page-fire .list-del:hover{background:rgba(255,105,97,0.18); color:var(--fire-coral);}
 
+/* ══════════════════════════════════════════════════════
+   OVERVIEW PAGE · iOS Minimal Style
+   ══════════════════════════════════════════════════════ */
+
+/* ════════════════════════════════════════════════════
+   OVERVIEW PAGE — iOS Minimal Style
+   Primary: #A0C4F0   Accent: #2F54EB
+   ════════════════════════════════════════════════════ */
+
+/* ── Period Tabs (Top) ── */
+.ov-topbar {
+  display: flex; align-items: center; justify-content: center;
+  padding: 12px 16px 0;
+  position: sticky; top: 0; z-index: 10;
+  background: var(--color-surface-1, #f5f7fa);
+}
+.ov-period-tabs {
+  display: flex; gap: 18px; align-items: center;
+}
+.ov-period-tab {
+  font-size: 15px; font-weight: 600; color: var(--color-label-3, #999);
+  background: none; border: none; cursor: pointer;
+  padding: 6px 4px 10px;
+  border-bottom: 2.5px solid transparent;
+  transition: color 0.18s, border-color 0.18s;
+  letter-spacing: 0.02em; min-width: 32px; text-align: center;
+}
+.ov-period-tab:hover { color: var(--color-label-1, #333); }
+.ov-period-tab.active {
+  color: var(--color-label-1, #222);
+  border-bottom-color: #2F54EB; font-weight: 700;
+}
+
+/* ── Period Bar (arrows + label + type toggle) ── */
+.ov-period-bar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px 12px;
+}
+.ov-arrow-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: none; background: transparent;
+  font-size: 20px; font-weight: 400; color: var(--color-label-2, #555);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1; flex-shrink: 0;
+}
+.ov-arrow-btn:hover { background: var(--color-surface-2, #eef1f5); color: var(--color-label-1, #222); }
+.ov-arrow-btn:active { background: var(--color-surface-3, #e2e5ea); }
+.ov-period-label {
+  font-size: 17px; font-weight: 700; color: var(--color-label-1, #222);
+  min-width: 90px; text-align: center; user-select: none;
+  flex-shrink: 0;
+}
+.ov-type-toggle {
+  display: flex; border-radius: 20px;
+  background: var(--color-surface-3, #eef1f5);
+  margin-left: auto; padding: 3px;
+}
+.ov-type-btn {
+  border: none; padding: 6px 16px; border-radius: 18px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  background: transparent; color: var(--color-label-4, #999);
+  transition: all 0.2s; white-space: nowrap;
+  font-family: inherit;
+}
+.ov-type-btn.active {
+  background: #A0C4F0; color: #fff;
+  box-shadow: 0 1px 6px rgba(47,84,235,0.18);
+}
+.ov-type-btn:hover:not(.active) { color: var(--color-label-2, #666); }
+
+/* ── Dropdown (hidden by default, shown for month/year) ── */
+.ov-dropdown-wrap {
+  display: none; padding: 0 16px 8px;
+}
+.ov-dropdown-wrap.visible { display: block; }
+.ov-month-picker-wrap {
+  position: relative; display: inline-flex; align-items: center;
+}
+.ov-month-picker {
+  appearance: none; -webkit-appearance: none;
+  border: none; background: transparent;
+  font-size: 15px; font-weight: 700; color: var(--color-label-1, #333);
+  cursor: pointer; padding: 0 20px 0 0; font-family: inherit;
+  outline: none;
+}
+.ov-month-arrow {
+  position: absolute; right: 0; pointer-events: none;
+  font-size: 10px; color: var(--color-label-3, #999);
+}
+
+/* ── Summary Card ── */
+.ov-summary-card {
+  margin: 4px 16px 14px; padding: 20px 18px;
+  background: color-mix(in srgb, #A0C4F0 8%, var(--color-surface-solid, #fff));
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(47,84,235,0.06), 0 1px 3px rgba(0,0,0,0.04);
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  border: 1px solid color-mix(in srgb, #A0C4F0 20%, transparent);
+}
+.ov-summary-amount {
+  font-size: 32px; font-weight: 800; color: var(--color-label-1, #111);
+  letter-spacing: -0.02em; line-height: 1;
+}
+.ov-summary-label {
+  font-size: 13px; font-weight: 600; color: var(--color-label-3, #777);
+  margin-top: 4px; margin-right: auto;
+}
+.ov-summary-change {
+  font-size: 13px; font-weight: 700; white-space: nowrap;
+  padding: 4px 10px; border-radius: 12px;
+}
+.ov-change--up   { color: #dc2626; background: rgba(220,38,38,0.08); }
+.ov-change--down { color: #16a34a; background: rgba(22,163,74,0.08); }
+
+/* ── Overview Card (chart / calendar / breakdown) ── */
+.ov-card {
+  background: var(--color-surface-solid, #fff);
+  border-radius: 14px; margin: 0 16px 14px;
+  padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.ov-card-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.ov-card-title {
+  font-size: 16px; font-weight: 800; color: var(--color-label-1, #222);
+  margin-right: auto;
+}
+.ov-card-tab {
+  font-size: 12px; font-weight: 600; color: var(--color-label-4, #999);
+  cursor: pointer;
+}
+.ov-card-tab.active {
+  color: #2F54EB; font-weight: 700;
+}
+
+/* ── Bar Chart ── */
+.ov-chart-wrap {
+  position: relative; height: 210px; margin-bottom: 6px;
+}
+@media (max-width: 480px) {
+  .ov-chart-wrap { height: 180px; }
+}
+.ov-bar-chart { width: 100%; height: 100%; display: block; max-width: 100%; }
+.ov-bar-empty {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--color-label-4, #999);
+}
+.ov-avg-line {
+  text-align: right; font-size: 11px; color: var(--color-label-3, #777);
+  font-weight: 600; padding-top: 6px;
+  border-top: 1px dashed color-mix(in srgb, #2F54EB 30%, transparent);
+}
+
+/* ── Calendar Grid ── */
+.ov-cal-header {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 2px; margin-bottom: 6px;
+}
+.ov-cal-weekday {
+  text-align: center; font-size: 11px; font-weight: 700;
+  color: var(--color-label-4, #999); padding: 6px 0;
+}
+.ov-cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 4px; max-height: 252px; overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.ov-cal-grid.expanded { max-height: 999px; }
+.ov-cal-cell {
+  aspect-ratio: 1; border-radius: 10px;
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 1px;
+  background: var(--color-surface-2, #f5f6f8);
+  font-size: 12px; color: var(--color-label-2, #555);
+  cursor: pointer; transition: background 0.15s;
+  min-width: 0; overflow: hidden;
+}
+.ov-cal-cell:hover { background: var(--color-surface-3, #eef1f5); }
+.ov-cal-cell--empty { background: transparent; cursor: default; }
+.ov-cal-cell--today {
+  background: #A0C4F0; color: #fff; font-weight: 700;
+  box-shadow: 0 1px 6px rgba(160,196,240,0.4);
+}
+.ov-cal-cell--month { aspect-ratio: auto; }
+.ov-cal-day { font-size: 13px; font-weight: 700; line-height: 1.1; }
+.ov-cal-cell--today .ov-cal-day { font-size: 12px; }
+.ov-cal-amount {
+  font-size: 10px; font-weight: 600; line-height: 1;
+  color: var(--color-label-3, #777); white-space: nowrap;
+}
+.ov-cal-cell--today .ov-cal-amount { color: #fff; }
+.ov-cal-toggle {
+  text-align: center; padding: 10px 0 2px;
+  font-size: 12px; font-weight: 600; color: #2F54EB;
+  cursor: pointer; user-select: none;
+}
+
+/* ── Category Breakdown ── */
+.ov-card-section-title {
+  font-size: 15px; font-weight: 700; color: var(--color-label-1, #222);
+  margin-bottom: 8px; display: flex; align-items: center; gap: 10px;
+}
+.ov-compare-toggle {
+  font-size: 11px; font-weight: 500; color: var(--color-label-4, #999);
+  cursor: pointer; margin-left: auto;
+}
+.ov-cat-summary {
+  font-size: 13px; font-weight: 500; color: var(--color-label-2, #555);
+  margin-bottom: 12px; line-height: 1.5;
+}
+.ov-cat-breakdown {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.ov-cat-row {
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; padding: 6px 0; border-radius: 8px;
+  transition: background 0.15s;
+}
+.ov-cat-row:hover { background: var(--color-surface-2, #f5f6f8); }
+.ov-cat-row:active { background: var(--color-surface-3, #eef1f5); }
+.ov-cat-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.ov-cat-info {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 5px;
+}
+.ov-cat-name {
+  font-size: 13px; font-weight: 600; color: var(--color-label-1, #222);
+}
+.ov-cat-bar-track {
+  height: 6px; border-radius: 3px;
+  background: var(--color-surface-3, #eef1f5);
+  overflow: hidden;
+}
+.ov-cat-bar-fill {
+  height: 100%; border-radius: 3px;
+  transition: width 0.5s ease; min-width: 2px;
+}
+.ov-cat-right { text-align: right; flex-shrink: 0; }
+.ov-cat-amount {
+  font-size: 13px; font-weight: 700; color: var(--color-label-1, #222);
+}
+.ov-cat-pct {
+  font-size: 11px; font-weight: 600; color: var(--color-label-4, #999);
+}
+
+/* ── Category Detail Overlay ── */
+.cat-detail-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(0,0,0,0.35); display: none;
+  align-items: flex-end; justify-content: center;
+}
+.cat-detail-overlay.open { display: flex; }
+.cat-detail-sheet {
+  background: var(--color-surface-solid, #fff);
+  border-radius: 20px 20px 0 0; width: 100%;
+  max-width: 500px; max-height: 80vh; overflow-y: auto;
+  padding: 20px 16px 32px;
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+  animation: slideUp 0.3s ease-out;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+.cat-detail-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--color-label-4, #ccc); margin: 0 auto 16px;
+}
+.cat-detail-title {
+  font-size: 17px; font-weight: 700; color: var(--color-label-1, #222);
+  margin-bottom: 14px; text-align: center;
+}
+.cat-detail-sort { display: flex; gap: 6px; margin-bottom: 14px; }
+.seg-pill {
+  border: none; padding: 5px 12px; border-radius: 14px;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  background: var(--color-surface-2, #f5f6f8);
+  color: var(--color-label-3, #777);
+  font-family: inherit; transition: all 0.15s;
+}
+.seg-pill.active {
+  background: #2F54EB; color: #fff;
+}
+.cat-detail-list { display: flex; flex-direction: column; }
+.cat-detail-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--color-sep, #f0f0f0);
+}
+.cat-detail-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.cat-detail-info { flex: 1; min-width: 0; }
+.cat-detail-note { font-size: 14px; font-weight: 600; color: var(--color-label-1, #222); }
+.cat-detail-date { font-size: 11px; color: var(--color-label-4, #999); margin-top: 2px; }
+.cat-detail-amount { font-size: 15px; font-weight: 700; }
+.cat-detail-amount.expense { color: var(--color-orange, #f60); }
+.cat-detail-amount.income  { color: var(--color-green, #16a34a); }
+
+/* ── Dark Mode ── */
+[data-theme="dark"] .ov-topbar { background: var(--color-surface-1, #1a1a1d); }
+[data-theme="dark"] .ov-summary-card {
+  background: color-mix(in srgb, #A0C4F0 10%, var(--color-surface-solid, #1c1c1e));
+  border-color: color-mix(in srgb, #A0C4F0 15%, transparent);
+}
+[data-theme="dark"] .ov-cal-cell { background: var(--color-surface-2, #2a2a2e); }
+[data-theme="dark"] .ov-cal-cell--today { background: #A0C4F0; color: #fff; box-shadow: 0 1px 8px rgba(160,196,240,0.3); }
+[data-theme="dark"] .ov-type-toggle { background: var(--color-surface-2, #2a2a2e); }
+[data-theme="dark"] .ov-arrow-btn:hover { background: var(--color-surface-2, #2a2a2e); }
+[data-theme="dark"] .ov-card { box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+[data-theme="dark"] .cat-detail-sheet { background: var(--color-surface-1, #1a1a1d); }
+[data-theme="dark"] .cat-detail-row { border-color: var(--color-sep, #2a2a2e); }
+[data-theme="dark"] .ov-cat-row:hover { background: var(--color-surface-2, #2a2a2e); }
+
 </style>
 <style>
 /* ── src/css/tokens.css ── */
@@ -2463,66 +2785,97 @@ body::after {
 
     <!-- ════════════════ PAGE: OVERVIEW ════════════════ -->
     <section class="page active" id="page-overview">
-      <div class="page-title-block">
-        <div class="flex-row gap-10">
-          <span style="font-size:26px">👋</span>
-          <div>
-            <div class="page-title" id="greetingText">早上好</div>
-            <div class="page-subtitle" data-i18n="overviewSubtitle">这是你的财务总览</div>
-          </div>
+
+      <!-- ▸ Period Tabs: 日 | 周 | 月 | 年 | 全部 -->
+      <div class="ov-topbar">
+        <div class="ov-period-tabs" id="ovPeriodTabs">
+          <button class="ov-period-tab" data-period="day">日</button>
+          <button class="ov-period-tab" data-period="week">周</button>
+          <button class="ov-period-tab active" data-period="month">月</button>
+          <button class="ov-period-tab" data-period="year">年</button>
+          <button class="ov-period-tab" data-period="all">全部</button>
         </div>
       </div>
 
-      <div class="flex-between" style="margin-bottom:14px">
-        <div class="segmented" id="periodSeg">
-          <button class="seg-pill active" data-period="month" data-i18n="periodMonth">本月</button>
-          <button class="seg-pill" data-period="quarter" data-i18n="periodQuarter">本季</button>
-          <button class="seg-pill" data-period="year" data-i18n="periodYear">今年</button>
-          <button class="seg-pill" data-period="all" data-i18n="periodAll">全部</button>
+      <!-- ▸ Period Navigation: arrows + label + type toggle -->
+      <div class="ov-period-bar">
+        <button class="ov-arrow-btn" id="ovPrevBtn" aria-label="上一周期">&lsaquo;</button>
+        <div class="ov-period-label" id="ovPeriodLabel">2026年8月</div>
+        <button class="ov-arrow-btn" id="ovNextBtn" aria-label="下一周期">&rsaquo;</button>
+        <div class="ov-type-toggle" id="ovTypeToggle">
+          <button class="ov-type-btn active" data-type="expense">支出</button>
+          <button class="ov-type-btn" data-type="income">收入</button>
         </div>
       </div>
 
-      <div class="hero-card hero-card--rose">
-        <div class="hero-label" data-i18n="netBalance">净结余 · NET BALANCE</div>
-        <div class="hero-value" id="netAmount">¥0</div>
-        <div class="hero-sub" id="netSub">暂无数据</div>
-        <div class="hero-stats">
-          <div class="hero-stat">
-            <div class="hero-stat-label" data-i18n="totalIncome">收入</div>
-            <div class="hero-stat-value" id="heroIncome">¥0</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-label" data-i18n="totalExpense">支出</div>
-            <div class="hero-stat-value" id="heroExpense">¥0</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-label" data-i18n="savingsRate">储蓄率</div>
-            <div class="hero-stat-value" id="heroSaveRate">—</div>
-          </div>
+      <!-- ▸ Dropdown for month/year quick-jump -->
+      <div class="ov-dropdown-wrap" id="ovDropdownWrap">
+        <div class="ov-month-picker-wrap">
+          <select class="ov-month-picker" id="ovMonthPicker"></select>
+          <span class="ov-month-arrow">▼</span>
         </div>
       </div>
 
-      <div class="sh"><div class="sh-title">收支走势</div></div>
-      <div class="card glass">
-        <div id="trendEmpty" class="empty-state" style="display:none">
-          <div class="empty-icon">📊</div><div class="empty-text">导入数据后显示趋势图</div>
-        </div>
-        <div class="chart-trend"><canvas id="trendChart"></canvas></div>
+      <!-- ▸ Summary Card -->
+      <div class="ov-summary-card" id="ovSummaryCard">
+        <div class="ov-summary-amount" id="ovSummaryAmount">¥0</div>
+        <div class="ov-summary-label" id="ovSummaryLabel">本月支出</div>
+        <div class="ov-summary-change" id="ovSummaryChange"></div>
       </div>
 
-      <div id="pieSection" style="display:none;margin-top:14px">
-        <div class="grid-2">
-          <div class="card glass">
-            <div class="chart-title">支出分类</div><div class="chart-sub">各类别占比</div>
-            <div class="legend-flow" id="expenseLegend"></div>
+      <!-- ▸ Bar Chart -->
+      <div class="ov-card">
+        <div class="ov-card-header">
+          <span class="ov-card-title">月度小结</span>
+          <span class="ov-card-tab active">支出分类</span>
+          <span class="ov-card-tab">省钱建议</span>
+        </div>
+        <div class="ov-chart-wrap">
+          <div id="ovBarEmpty" class="ov-bar-empty" style="display:none">
+            <div class="empty-icon">📊</div><div class="empty-text">暂无数据</div>
           </div>
-          <div class="card glass">
-            <div class="chart-title">收入分类</div><div class="chart-sub">各类别占比</div>
-            <div class="legend-flow" id="incomeLegend"></div>
+          <canvas id="ovBarChart" class="ov-bar-chart"></canvas>
+        </div>
+        <div class="ov-avg-line" id="ovAvgLine">月均值 ¥0</div>
+      </div>
+
+      <!-- ▸ Calendar Grid -->
+      <div class="ov-card">
+        <div class="ov-cal-header" id="ovCalHeader">
+          <span class="ov-cal-weekday">日</span>
+          <span class="ov-cal-weekday">一</span>
+          <span class="ov-cal-weekday">二</span>
+          <span class="ov-cal-weekday">三</span>
+          <span class="ov-cal-weekday">四</span>
+          <span class="ov-cal-weekday">五</span>
+          <span class="ov-cal-weekday">六</span>
+        </div>
+        <div class="ov-cal-grid" id="ovCalGrid"></div>
+        <div class="ov-cal-toggle" id="ovCalToggle">展开全部 ∨</div>
+      </div>
+
+      <!-- ▸ Category Breakdown -->
+      <div class="ov-card">
+        <div class="ov-card-section-title">支出分类 <span class="ov-compare-toggle">对比上月</span></div>
+        <div class="ov-cat-summary" id="ovCatSummary">暂无数据</div>
+        <div class="ov-cat-breakdown" id="ovCatBreakdown"></div>
+      </div>
+
+      <!-- ▸ Category Detail Overlay -->
+      <div class="cat-detail-overlay" id="catDetailOverlay">
+        <div class="cat-detail-sheet">
+          <div class="cat-detail-handle"></div>
+          <div class="cat-detail-title" id="catDetailTitle"></div>
+          <div class="cat-detail-sort" id="catDetailSortSeg">
+            <button class="seg-pill active" data-sort="time">时间</button>
+            <button class="seg-pill" data-sort="amount-desc">金额↓</button>
+            <button class="seg-pill" data-sort="amount-asc">金额↑</button>
           </div>
+          <div class="cat-detail-list" id="catDetailList"></div>
         </div>
       </div>
 
+      <!-- ▸ Recent Transactions -->
       <div class="sh">
         <div class="sh-title">最近交易</div>
         <button class="sh-action" data-page="transactions">查看全部 ›</button>
@@ -7227,43 +7580,163 @@ function initOverviewPage() {
 function render2() {
   const all = getTransactions();
   const txs = _getFilteredTxs(all);
-  _renderHero(txs);
-  _renderBarChart(all);
-  _renderCalendar2(all);
+  const prevTxs = _getPreviousPeriodTxs(all);
+  const range = _buildDateRange();
+  _updatePeriodUI(range);
+  _renderSummaryCard(txs, prevTxs, range);
+  _renderBarChart(all, range);
+  _renderCalendar2(all, range);
   _renderCategories(txs);
   _renderRecent(txs);
 }
+function _buildDateRange() {
+  const now = /* @__PURE__ */ new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  switch (_period) {
+    case "day": {
+      const d = new Date(today);
+      d.setDate(d.getDate() + _dayOffset);
+      const start = new Date(d);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setDate(end.getDate() + 1);
+      const isToday = _dayOffset === 0;
+      return {
+        start,
+        end,
+        label: isToday ? "\u4ECA\u5929" : `${start.getFullYear()}\u5E74${start.getMonth() + 1}\u6708${start.getDate()}\u65E5`,
+        canNext: _dayOffset < 0,
+        canPrev: true
+      };
+    }
+    case "week": {
+      const dayOfWeek = now.getDay();
+      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+      const thisMonday = new Date(today);
+      thisMonday.setDate(today.getDate() + mondayOffset);
+      const weekStart = new Date(thisMonday);
+      weekStart.setDate(thisMonday.getDate() + _weekOffset * 7);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekStart.getDate() + 7);
+      const isThisWeek = _weekOffset === 0;
+      const weekNum = _getISOWeekNumber(weekStart);
+      return {
+        start: weekStart,
+        end: weekEnd,
+        label: isThisWeek ? "\u672C\u5468" : `${weekStart.getFullYear()}\u5E74\u7B2C${weekNum}\u5468`,
+        canNext: _weekOffset < 0,
+        canPrev: true
+      };
+    }
+    case "month": {
+      let y = now.getFullYear(), m = now.getMonth() + 1;
+      let totalOffset = _monthOffset;
+      m += totalOffset;
+      while (m > 12) {
+        m -= 12;
+        y++;
+      }
+      while (m < 1) {
+        m += 12;
+        y--;
+      }
+      const start = new Date(y, m - 1, 1);
+      const end = new Date(y, m, 1);
+      const isCurrent = y === now.getFullYear() && m === now.getMonth() + 1;
+      return {
+        start,
+        end,
+        label: `${y}\u5E74${m}\u6708`,
+        canNext: !isCurrent,
+        canPrev: true
+      };
+    }
+    case "year": {
+      const y = now.getFullYear() + _yearOffset;
+      const start = new Date(y, 0, 1);
+      const end = new Date(y + 1, 0, 1);
+      const isCurrent = _yearOffset === 0;
+      return {
+        start,
+        end,
+        label: `${y}\u5E74`,
+        canNext: _yearOffset < 0,
+        canPrev: true
+      };
+    }
+    case "all": {
+      const start = new Date(2e3, 0, 1);
+      const end = new Date(2100, 0, 1);
+      return {
+        start,
+        end,
+        label: "\u5168\u90E8",
+        canNext: false,
+        canPrev: false
+      };
+    }
+  }
+}
+function _getISOWeekNumber(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil(((date - yearStart) / 864e5 + 1) / 7);
+}
 function _getFilteredTxs(all) {
+  const range = _buildDateRange();
   return all.filter((tx) => {
     if (tx.deleted) return false;
     const d = new Date(tx.date);
     if (tx.type !== (_type === "expense" ? "\u652F\u51FA" : "\u6536\u5165")) return false;
-    if (_period === "month")
-      return d.getFullYear() === _selectedYear && d.getMonth() + 1 === _selectedMonth;
-    if (_period === "week") {
-      const now = /* @__PURE__ */ new Date();
-      const startOfWeek = new Date(now);
-      startOfWeek.setDate(now.getDate() - now.getDay());
-      startOfWeek.setHours(0, 0, 0, 0);
-      const endOfWeek = new Date(startOfWeek);
-      endOfWeek.setDate(startOfWeek.getDate() + 7);
-      return d >= startOfWeek && d < endOfWeek;
-    }
-    if (_period === "year")
-      return d.getFullYear() === _selectedYear;
-    return false;
+    if (_period === "all") return true;
+    return d >= range.start && d < range.end;
   });
+}
+function _getPreviousPeriodTxs(all) {
+  const range = _buildDateRange();
+  const duration = range.end - range.start;
+  const prevStart = new Date(range.start.getTime() - duration);
+  const prevEnd = range.start;
+  return all.filter((tx) => {
+    if (tx.deleted) return false;
+    const d = new Date(tx.date);
+    if (tx.type !== (_type === "expense" ? "\u652F\u51FA" : "\u6536\u5165")) return false;
+    return d >= prevStart && d < prevEnd;
+  });
+}
+function _updatePeriodUI(range) {
+  const labelEl = document.getElementById("ovPeriodLabel");
+  if (labelEl) labelEl.textContent = range.label;
+  const prevBtn = document.getElementById("ovPrevBtn");
+  const nextBtn = document.getElementById("ovNextBtn");
+  if (prevBtn) prevBtn.style.visibility = _period === "all" ? "hidden" : "visible";
+  if (nextBtn) {
+    if (_period === "day") nextBtn.style.visibility = _dayOffset < 0 ? "visible" : "hidden";
+    else if (_period === "week") nextBtn.style.visibility = _weekOffset < 0 ? "visible" : "hidden";
+    else if (_period === "month") nextBtn.style.visibility = _monthOffset < 0 ? "visible" : "hidden";
+    else if (_period === "year") nextBtn.style.visibility = _yearOffset < 0 ? "visible" : "hidden";
+    else nextBtn.style.visibility = "hidden";
+  }
 }
 function _wireControls() {
   document.querySelectorAll("#ovPeriodTabs .ov-period-tab").forEach((btn) => {
     btn.addEventListener("click", () => {
       _period = btn.dataset.period;
+      _dayOffset = 0;
+      _weekOffset = 0;
+      _monthOffset = 0;
+      _yearOffset = 0;
       document.querySelectorAll("#ovPeriodTabs .ov-period-tab").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
-      _syncMonthSelectorVisibility();
+      _syncDropdown();
       render2();
     });
   });
+  const prevBtn = document.getElementById("ovPrevBtn");
+  const nextBtn = document.getElementById("ovNextBtn");
+  if (prevBtn) prevBtn.addEventListener("click", () => _shiftPeriod(-1));
+  if (nextBtn) nextBtn.addEventListener("click", () => _shiftPeriod(1));
   document.querySelectorAll("#ovTypeToggle .ov-type-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       _type = btn.dataset.type;
@@ -7276,8 +7749,10 @@ function _wireControls() {
   if (monthPicker) {
     monthPicker.addEventListener("change", () => {
       const [y, m] = monthPicker.value.split("-").map(Number);
+      const now = /* @__PURE__ */ new Date();
       _selectedYear = y;
       _selectedMonth = m;
+      _monthOffset = (y - now.getFullYear()) * 12 + (m - (now.getMonth() + 1));
       render2();
     });
   }
@@ -7285,10 +7760,9 @@ function _wireControls() {
   if (calToggle) {
     calToggle.addEventListener("click", () => {
       const grid = document.getElementById("ovCalGrid");
-      const toggle = document.getElementById("ovCalToggle");
-      if (!grid || !toggle) return;
+      if (!grid) return;
       const expanded = grid.classList.toggle("expanded");
-      toggle.innerHTML = expanded ? "\u6536\u8D77\u5168\u90E8 \u2227" : "\u5C55\u5F00\u5168\u90E8 \u2228";
+      calToggle.innerHTML = expanded ? "\u6536\u8D77\u5168\u90E8 \u2227" : "\u5C55\u5F00\u5168\u90E8 \u2228";
     });
   }
   const overlay = document.getElementById("catDetailOverlay");
@@ -7305,59 +7779,147 @@ function _wireControls() {
       _renderCatDetail();
     };
   });
+  window.addEventListener("resize", () => {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => render2(), 150);
+  });
+  const chartWrap = document.querySelector(".ov-chart-wrap");
+  if (chartWrap && !_resizeObserver) {
+    _resizeObserver = new ResizeObserver(() => {
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(() => render2(), 150);
+    });
+    _resizeObserver.observe(chartWrap);
+  }
 }
-function _syncMonthSelectorVisibility() {
-  const selector = document.getElementById("ovMonthSelector");
-  if (!selector) return;
-  selector.style.display = _period === "week" ? "none" : "";
-  if (_period === "month") _buildMonthDropdown();
-  if (_period === "year") _buildYearDropdown();
+function _shiftPeriod(delta) {
+  switch (_period) {
+    case "day":
+      _dayOffset += delta;
+      break;
+    case "week":
+      _weekOffset += delta;
+      break;
+    case "month":
+      _monthOffset += delta;
+      break;
+    case "year":
+      _yearOffset += delta;
+      break;
+    case "all":
+      return;
+  }
+  const range = _buildDateRange();
+  if (_period === "day" && _dayOffset > 0) {
+    _dayOffset = 0;
+  }
+  if (_period === "week" && _weekOffset > 0) {
+    _weekOffset = 0;
+  }
+  if (_period === "month" && _monthOffset > 0) {
+    _monthOffset = 0;
+  }
+  if (_period === "year" && _yearOffset > 0) {
+    _yearOffset = 0;
+  }
+  render2();
 }
-function _buildMonthDropdown() {
+function _syncDropdown() {
+  const dropdownWrap = document.getElementById("ovDropdownWrap");
+  if (!dropdownWrap) return;
+  if (_period === "month" || _period === "year") {
+    dropdownWrap.style.display = "";
+    _buildDropdown();
+  } else {
+    dropdownWrap.style.display = "none";
+  }
+}
+function _buildDropdown() {
   const sel = document.getElementById("ovMonthPicker");
   if (!sel) return;
   const now = /* @__PURE__ */ new Date();
   const cy = now.getFullYear(), cm = now.getMonth() + 1;
   let html = "";
-  for (let y = cy - 2; y <= cy; y++) {
-    for (let m = 1; m <= 12; m++) {
-      if (y === cy && m > cm) continue;
-      const val = `${y}-${pad2(m)}`;
-      const label = `${y}\u5E74${m}\u6708`;
-      const selected = y === _selectedYear && m === _selectedMonth ? " selected" : "";
-      html += `<option value="${val}"${selected}>${label}</option>`;
+  if (_period === "month") {
+    for (let y = cy - 2; y <= cy; y++) {
+      for (let m = 1; m <= 12; m++) {
+        if (y === cy && m > cm) continue;
+        const val = `${y}-${pad2(m)}`;
+        const targetY = now.getFullYear() + Math.floor((_monthOffset + (now.getMonth() + 1)) / 12);
+        const range = _buildDateRange();
+        const selected = y === range.start.getFullYear() && m === range.start.getMonth() + 1 ? " selected" : "";
+        html += `<option value="${val}"${selected}>${y}\u5E74${m}\u6708</option>`;
+      }
+    }
+  } else if (_period === "year") {
+    for (let y = cy - 3; y <= cy; y++) {
+      const range = _buildDateRange();
+      const selected = y === range.start.getFullYear() ? " selected" : "";
+      html += `<option value="${y}-01"${selected}>${y}\u5E74</option>`;
     }
   }
   sel.innerHTML = html;
 }
-function _buildYearDropdown() {
-  const sel = document.getElementById("ovMonthPicker");
-  if (!sel) return;
-  const cy = (/* @__PURE__ */ new Date()).getFullYear();
-  let html = "";
-  for (let y = cy - 3; y <= cy; y++) {
-    const selected = y === _selectedYear ? " selected" : "";
-    html += `<option value="${y}-01"${selected}>${y}\u5E74</option>`;
-  }
-  sel.innerHTML = html;
-}
-function _renderHero(txs) {
+function _renderSummaryCard(txs, prevTxs, range) {
   const total = txs.reduce((s, tx) => s + tx.amount, 0);
-  const el = document.getElementById("ovMonthTotal");
-  const lbl = document.getElementById("ovMonthLabel");
-  if (el) el.textContent = `\xA5${fmt(total)}`;
-  if (lbl) {
-    const typeLabel = _type === "expense" ? "\u603B\u652F\u51FA" : "\u603B\u6536\u5165";
-    if (_period === "month") {
-      lbl.textContent = `${_selectedYear}\u5E74${_selectedMonth}\u6708${typeLabel}`;
-    } else if (_period === "week") {
-      lbl.textContent = `\u672C\u5468${typeLabel}`;
+  const prevTotal = prevTxs.reduce((s, tx) => s + tx.amount, 0);
+  const amountEl = document.getElementById("ovSummaryAmount");
+  const labelEl = document.getElementById("ovSummaryLabel");
+  const changeEl = document.getElementById("ovSummaryChange");
+  if (amountEl) amountEl.textContent = `\xA5${fmt(total)}`;
+  const typeLabel = _type === "expense" ? "\u652F\u51FA" : "\u6536\u5165";
+  if (labelEl) {
+    switch (_period) {
+      case "day":
+        labelEl.textContent = `\u672C\u65E5${typeLabel}`;
+        break;
+      case "week":
+        labelEl.textContent = `\u672C\u5468${typeLabel}`;
+        break;
+      case "month":
+        labelEl.textContent = `\u672C\u6708${typeLabel}`;
+        break;
+      case "year":
+        labelEl.textContent = `${range.label}${typeLabel}`;
+        break;
+      case "all":
+        labelEl.textContent = `\u5168\u90E8${typeLabel}`;
+        break;
+    }
+  }
+  if (changeEl) {
+    if (_period === "all" || prevTotal === 0) {
+      changeEl.textContent = "";
+      changeEl.className = "ov-summary-change";
     } else {
-      lbl.textContent = `${_selectedYear}\u5E74${typeLabel}`;
+      const diff = total - prevTotal;
+      const pct = prevTotal > 0 ? Math.abs(diff / prevTotal * 100).toFixed(1) : 0;
+      const arrow = diff >= 0 ? "\u2191" : "\u2193";
+      const dir = diff >= 0 ? "up" : "down";
+      const prevLabel = _type === "expense" ? "\u652F\u51FA" : "\u6536\u5165";
+      let periodLabel;
+      switch (_period) {
+        case "day":
+          periodLabel = "\u6628\u65E5";
+          break;
+        case "week":
+          periodLabel = "\u4E0A\u5468";
+          break;
+        case "month":
+          periodLabel = "\u4E0A\u6708";
+          break;
+        case "year":
+          periodLabel = "\u53BB\u5E74";
+          break;
+        default:
+          periodLabel = "\u4E0A\u671F";
+      }
+      changeEl.textContent = `\u8F83${periodLabel} ${arrow}${pct}%`;
+      changeEl.className = `ov-summary-change ov-change--${dir}`;
     }
   }
 }
-function _renderBarChart(all) {
+function _renderBarChart(all, range) {
   const canvas = document.getElementById("ovBarChart");
   const emptyEl = document.getElementById("ovBarEmpty");
   if (!canvas) return;
@@ -7365,82 +7927,333 @@ function _renderBarChart(all) {
   if (!activeTxs.length) {
     canvas.style.display = "none";
     if (emptyEl) emptyEl.style.display = "";
+    const avgEl2 = document.getElementById("ovAvgLine");
+    if (avgEl2) avgEl2.textContent = "";
     return;
   }
   canvas.style.display = "";
   if (emptyEl) emptyEl.style.display = "none";
-  let monthsToShow = 5;
-  if (_period === "year") monthsToShow = 12;
-  const now = /* @__PURE__ */ new Date();
-  const refYear = _period === "year" ? _selectedYear : now.getFullYear();
-  const refMonth = _period === "year" ? 12 : now.getMonth() + 1;
-  const monthBuckets = [];
-  for (let i = monthsToShow - 1; i >= 0; i--) {
-    let m = refMonth - i;
-    let y = refYear;
-    while (m <= 0) {
-      m += 12;
-      y--;
-    }
-    monthBuckets.push({ year: y, month: m, total: 0 });
-  }
-  activeTxs.forEach((tx) => {
-    const d = new Date(tx.date);
-    const bucket = monthBuckets.find((b) => b.year === d.getFullYear() && b.month === d.getMonth() + 1);
-    if (bucket) bucket.total += tx.amount;
-  });
-  const labels = monthBuckets.map((b) => `${b.month}\u6708`);
-  const data = monthBuckets.map((b) => b.total);
-  const avg = data.reduce((s, v) => s + v, 0) / (data.filter((v) => v > 0).length || 1);
+  let labels = [], data = [];
   const barColor = _type === "expense" ? "#A0C4F0" : "#A0E8C8";
-  const colors = data.map(() => barColor);
-  document.getElementById("ovAvgLine").textContent = `\u6708${_type === "expense" ? "\u652F\u51FA" : "\u6536\u5165"}\u5747\u503C \xA5${fmt(avg)}`;
-  buildVertBar("ovBarChart", labels, data, colors);
-}
-function _renderCalendar2(all) {
-  const grid = document.getElementById("ovCalGrid");
-  if (!grid) return;
-  let year = _selectedYear, month = _selectedMonth;
-  if (_period === "week") {
-    const now = /* @__PURE__ */ new Date();
-    year = now.getFullYear();
-    month = now.getMonth() + 1;
+  const accentColor = "#2F54EB";
+  switch (_period) {
+    case "day": {
+      const now = /* @__PURE__ */ new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const dayEnd = new Date(dayStart);
+        dayEnd.setDate(dayEnd.getDate() + 1);
+        const total = activeTxs.filter((tx) => {
+          const dx = new Date(tx.date);
+          return dx >= dayStart && dx < dayEnd;
+        }).reduce((s, tx) => s + tx.amount, 0);
+        labels.push(`${d.getMonth() + 1}/${d.getDate()}`);
+        data.push(total);
+      }
+      break;
+    }
+    case "week": {
+      const weekStart = new Date(range.start);
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(weekStart.getDate() + i);
+        const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const dayEnd = new Date(dayStart);
+        dayEnd.setDate(dayEnd.getDate() + 1);
+        const total = activeTxs.filter((tx) => {
+          const dx = new Date(tx.date);
+          return dx >= dayStart && dx < dayEnd;
+        }).reduce((s, tx) => s + tx.amount, 0);
+        const dayNames = ["\u65E5", "\u4E00", "\u4E8C", "\u4E09", "\u56DB", "\u4E94", "\u516D"];
+        labels.push(`\u5468${dayNames[d.getDay()]}`);
+        data.push(total);
+      }
+      break;
+    }
+    case "month": {
+      const now = /* @__PURE__ */ new Date();
+      for (let i = 4; i >= 0; i--) {
+        let m = now.getMonth() + 1 - i, y = now.getFullYear();
+        while (m <= 0) {
+          m += 12;
+          y--;
+        }
+        const total = activeTxs.filter((tx) => {
+          const d = new Date(tx.date);
+          return d.getFullYear() === y && d.getMonth() + 1 === m;
+        }).reduce((s, tx) => s + tx.amount, 0);
+        labels.push(`${m}\u6708`);
+        data.push(total);
+      }
+      break;
+    }
+    case "year": {
+      const y = range.start.getFullYear();
+      for (let m = 1; m <= 12; m++) {
+        const total = activeTxs.filter((tx) => {
+          const d = new Date(tx.date);
+          return d.getFullYear() === y && d.getMonth() + 1 === m;
+        }).reduce((s, tx) => s + tx.amount, 0);
+        labels.push(`${m}\u6708`);
+        data.push(total);
+      }
+      break;
+    }
+    case "all": {
+      const yearMap = {};
+      activeTxs.forEach((tx) => {
+        const y = new Date(tx.date).getFullYear();
+        yearMap[y] = (yearMap[y] || 0) + tx.amount;
+      });
+      const years = Object.keys(yearMap).sort();
+      if (years.length < 2) {
+        for (let m = 1; m <= 12; m++) {
+          const total = activeTxs.filter((tx) => {
+            const d = new Date(tx.date);
+            return d.getMonth() + 1 === m;
+          }).reduce((s, tx) => s + tx.amount, 0);
+          labels.push(`${m}\u6708`);
+          data.push(total);
+        }
+      } else {
+        years.forEach((y) => {
+          labels.push(`${y}\u5E74`);
+          data.push(yearMap[y]);
+        });
+      }
+      break;
+    }
   }
+  const nonZero = data.filter((v) => v > 0);
+  const avg = nonZero.length > 0 ? nonZero.reduce((s, v) => s + v, 0) / nonZero.length : 0;
+  const colors = data.map(() => barColor);
+  const avgEl = document.getElementById("ovAvgLine");
+  if (avgEl) {
+    avgEl.textContent = `\u6708${_type === "expense" ? "\u652F\u51FA" : "\u6536\u5165"}\u5747\u503C \xA5${fmt(avg)}`;
+  }
+  requestAnimationFrame(() => {
+    _buildVertBarWithAvg("ovBarChart", labels, data, colors, avg, barColor);
+  });
+}
+function _fmtBarLabel(v) {
+  if (v <= 0) return "";
+  if (v >= 1e4) return "\xA5" + (v / 1e4).toFixed(1).replace(/\.0$/, "") + "\u4E07";
+  return "\xA5" + v.toLocaleString("zh-CN");
+}
+function _fmtAxisTick(v) {
+  if (v >= 1e8) return "\xA5" + (v / 1e8).toFixed(0) + "\u4EBF";
+  if (v >= 1e4) return "\xA5" + (v / 1e4).toFixed(0) + "\u4E07";
+  if (v >= 1e3) return "\xA5" + (v / 1e3).toFixed(0) + "k";
+  return "\xA5" + v;
+}
+function _buildVertBarWithAvg(canvasId, labels, data, colors, avgValue, barColor) {
+  const { Chart: Chart2 } = window;
+  if (!Chart2) return;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const existing = Chart2.getChart(canvas);
+  if (existing) existing.destroy();
+  const dpr = window.devicePixelRatio || 1;
+  const parent = canvas.parentElement;
+  const rect = parent.getBoundingClientRect();
+  const w = rect.width || parent.clientWidth || 320;
+  const h = rect.height || parent.clientHeight || 200;
+  canvas.width = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+  const ctx2d = canvas.getContext("2d");
+  ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+  if (!_avgLinePlugin) {
+    _avgLinePlugin = {
+      id: "avgLinePlugin",
+      afterDatasetsDraw(chart) {
+        const avg = chart.options.plugins?.avgLinePlugin?.avgValue;
+        if (!avg || avg <= 0) return;
+        const { ctx, scales: { x, y } } = chart;
+        const yPos = y.getPixelForValue(avg);
+        if (yPos < y.top || yPos > y.bottom) return;
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = "#2F54EB";
+        ctx.lineWidth = 1.5;
+        ctx.moveTo(x.left, yPos);
+        ctx.lineTo(x.right, yPos);
+        ctx.stroke();
+        ctx.fillStyle = "#2F54EB";
+        ctx.font = "600 11px -apple-system, sans-serif";
+        ctx.textAlign = "left";
+        ctx.fillText("\u6708\u5747 \xA5" + _fmtBarLabel(avg).replace("\xA5", ""), x.left + 6, yPos - 5);
+        ctx.restore();
+      }
+    };
+  }
+  if (!Chart2.registry.plugins.get("avgLinePlugin")) {
+    Chart2.register(_avgLinePlugin);
+  }
+  new Chart2(canvas, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: colors,
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      devicePixelRatio: dpr,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: (c) => `  \xA5${c.raw.toLocaleString("zh-CN")}` }
+        },
+        datalabels: {
+          display: true,
+          anchor: "end",
+          align: "top",
+          offset: 4,
+          color: "#2F54EB",
+          font: (ctx) => ({
+            size: ctx.chart.width < 400 ? 10 : 11,
+            weight: "700"
+          }),
+          formatter: _fmtBarLabel
+        },
+        avgLinePlugin: { avgValue }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            font: { size: 11 },
+            maxRotation: 0,
+            autoSkip: true,
+            maxTicksLimit: 8
+          }
+        },
+        y: {
+          ticks: {
+            font: { size: 11 },
+            callback: _fmtAxisTick
+          }
+        }
+      }
+    }
+  });
+}
+function _renderCalendar2(all, range) {
+  const grid = document.getElementById("ovCalGrid");
+  const header = document.getElementById("ovCalHeader");
+  if (!grid) return;
   const txs = all.filter((tx) => {
     if (tx.deleted) return false;
     if (tx.type !== (_type === "expense" ? "\u652F\u51FA" : "\u6536\u5165")) return false;
     const d = new Date(tx.date);
-    return d.getFullYear() === year && d.getMonth() + 1 === month;
+    return d >= range.start && d < range.end;
   });
+  const today = /* @__PURE__ */ new Date();
+  const todayDate = today.getDate();
+  const todayYear = today.getFullYear();
+  const todayMonth = today.getMonth();
+  if (_period === "day") {
+    if (header) header.style.display = "none";
+    const d = range.start;
+    const dayTotal = txs.reduce((s, tx) => s + tx.amount, 0);
+    const isToday = d.getFullYear() === todayYear && d.getMonth() === todayMonth && d.getDate() === todayDate;
+    grid.innerHTML = `<div class="ov-cal-cell ov-cal-cell--today" style="grid-column:1/-1;aspect-ratio:auto;padding:24px 0">
+      <span class="ov-cal-day" style="font-size:20px">${isToday ? "\u4ECA\u5929" : `${d.getMonth() + 1}\u6708${d.getDate()}\u65E5`}</span>
+      <span class="ov-cal-amount" style="font-size:16px;font-weight:700">\xA5${fmt(dayTotal)}</span>
+    </div>`;
+    return;
+  }
+  if (_period === "year" || _period === "all") {
+    if (header) header.style.display = "none";
+    const y = _period === "year" ? range.start.getFullYear() : todayYear;
+    let months;
+    if (_period === "all") {
+      const monthSet = /* @__PURE__ */ new Set();
+      txs.forEach((tx) => {
+        const d = new Date(tx.date);
+        monthSet.add(`${d.getFullYear()}-${pad2(d.getMonth() + 1)}`);
+      });
+      months = Array.from(monthSet).sort();
+      if (months.length === 0) {
+        grid.innerHTML = '<div style="text-align:center;padding:20px;color:var(--color-label-4)">\u6682\u65E0\u6570\u636E</div>';
+        return;
+      }
+    } else {
+      months = [];
+      for (let m = 1; m <= 12; m++) {
+        months.push(`${y}-${pad2(m)}`);
+      }
+    }
+    const monthlyTotals = {};
+    txs.forEach((tx) => {
+      const d = new Date(tx.date);
+      const key = `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+      monthlyTotals[key] = (monthlyTotals[key] || 0) + tx.amount;
+    });
+    grid.style.gridTemplateColumns = "repeat(4, 1fr)";
+    grid.innerHTML = months.map((key) => {
+      const [yr, mo] = key.split("-").map(Number);
+      const total = monthlyTotals[key] || 0;
+      const isCurrent = yr === todayYear && mo === todayMonth + 1;
+      return `<div class="ov-cal-cell ov-cal-cell--month${isCurrent ? " ov-cal-cell--today" : ""}" style="aspect-ratio:auto;padding:10px 6px">
+        <span class="ov-cal-day">${mo}\u6708</span>
+        <span class="ov-cal-amount">\xA5${fmtK(total)}</span>
+      </div>`;
+    }).join("");
+    return;
+  }
+  if (header) header.style.display = "";
+  grid.style.gridTemplateColumns = "repeat(7, 1fr)";
+  let daysToShow;
+  if (_period === "week") {
+    const weekStart = new Date(range.start);
+    daysToShow = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart);
+      d.setDate(weekStart.getDate() + i);
+      daysToShow.push(d);
+    }
+  } else {
+    const firstDay = new Date(range.start.getFullYear(), range.start.getMonth(), 1);
+    const lastDay = new Date(range.start.getFullYear(), range.start.getMonth() + 1, 0);
+    const totalDays = lastDay.getDate();
+    const startDow = firstDay.getDay();
+    daysToShow = [];
+    for (let i = 0; i < startDow; i++) daysToShow.push(null);
+    for (let d = 1; d <= totalDays; d++) {
+      daysToShow.push(new Date(range.start.getFullYear(), range.start.getMonth(), d));
+    }
+  }
   const dailyMap = {};
   txs.forEach((tx) => {
     const d = new Date(tx.date);
     const day = d.getDate();
-    dailyMap[day] = (dailyMap[day] || 0) + tx.amount;
+    const key = `${d.getFullYear()}-${d.getMonth()}-${day}`;
+    dailyMap[key] = (dailyMap[key] || 0) + tx.amount;
   });
-  const firstDay = new Date(year, month - 1, 1);
-  const lastDay = new Date(year, month, 0);
-  const totalDays = lastDay.getDate();
-  const startDow = firstDay.getDay();
-  const today = /* @__PURE__ */ new Date();
-  const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month - 1;
-  const todayDate = today.getDate();
-  let cells = "";
-  for (let i = 0; i < startDow; i++) {
-    cells += '<div class="ov-cal-cell ov-cal-cell--empty"></div>';
-  }
-  for (let d = 1; d <= totalDays; d++) {
-    const amount = dailyMap[d] || 0;
-    const isToday = isCurrentMonth && d === todayDate;
+  grid.innerHTML = daysToShow.map((d) => {
+    if (!d) return '<div class="ov-cal-cell ov-cal-cell--empty"></div>';
+    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    const amount = dailyMap[key] || 0;
+    const isToday = d.getFullYear() === todayYear && d.getMonth() === todayMonth && d.getDate() === todayDate;
     const cls = isToday ? " ov-cal-cell--today" : "";
-    const amountStr = dailyMap[d] !== void 0 ? `\xA5${fmtK(amount)}` : "-";
-    const dayLabel = isToday ? "\u4ECA\u5929" : d;
-    cells += `<div class="ov-cal-cell${cls}">
+    const amountStr = dailyMap[key] !== void 0 && dailyMap[key] > 0 ? `\xA5${fmtK(amount)}` : "-";
+    const dayLabel = isToday ? "\u4ECA\u5929" : d.getDate();
+    return `<div class="ov-cal-cell${cls}">
       <span class="ov-cal-day">${dayLabel}</span>
       <span class="ov-cal-amount">${amountStr}</span>
     </div>`;
-  }
-  grid.innerHTML = cells;
+  }).join("");
 }
 function _renderCategories(txs) {
   const catMap = catTotals(txs, _type === "expense" ? "\u652F\u51FA" : "\u6536\u5165");
@@ -7449,13 +8262,15 @@ function _renderCategories(txs) {
   if (!container) return;
   if (!sorted.length) {
     container.innerHTML = '<div style="font-size:12px;color:var(--color-label-4);padding:8px 0;text-align:center">\u6682\u65E0\u6570\u636E</div>';
+    const summary2 = document.getElementById("ovCatSummary");
+    if (summary2) summary2.textContent = "\u6682\u65E0\u6570\u636E";
     return;
   }
   const total = sorted.reduce((s, [, v]) => s + v, 0);
   const colors = palette();
   const topCat = sorted[0][0];
-  const summaryText = `<b>${topCat}</b>\u5206\u7C7B\u6D88\u8D39\u5360\u6BD4\u6700\u9AD8`;
-  document.getElementById("ovCatSummary").innerHTML = summaryText;
+  const summary = document.getElementById("ovCatSummary");
+  if (summary) summary.innerHTML = `<b>${esc(topCat)}</b>\u5206\u7C7B\u6D88\u8D39\u5360\u6BD4\u6700\u9AD8`;
   _catDetailData = {};
   sorted.forEach(([name, val]) => {
     _catDetailData[name] = {
@@ -7570,7 +8385,7 @@ function _txRowHtml(tx) {
     <div class="tx-amount ${cls}">${sign}\xA5${fmt(Math.abs(tx.amount))}</div>
   </div>`;
 }
-var _period, _type, _selectedYear, _selectedMonth, _catDetailData, _catDetailSort;
+var _period, _type, _selectedYear, _selectedMonth, _dayOffset, _weekOffset, _yearOffset, _monthOffset, _catDetailData, _catDetailSort, _resizeTimer, _resizeObserver, _avgLinePlugin;
 var init_overview = __esm({
   "src/js/pages/overview.js"() {
     init_store();
@@ -7582,8 +8397,15 @@ var init_overview = __esm({
     _type = "expense";
     _selectedYear = (/* @__PURE__ */ new Date()).getFullYear();
     _selectedMonth = (/* @__PURE__ */ new Date()).getMonth() + 1;
+    _dayOffset = 0;
+    _weekOffset = 0;
+    _yearOffset = 0;
+    _monthOffset = 0;
     _catDetailData = {};
     _catDetailSort = "time";
+    _resizeTimer = null;
+    _resizeObserver = null;
+    _avgLinePlugin = null;
   }
 });
 
@@ -7680,7 +8502,7 @@ function render3() {
     category: _normalizeCategory(a.category)
   }));
   const total = assets.reduce((s, a) => s + (Number(a.value) || 0), 0);
-  _renderHero2(total, assets.length);
+  _renderHero(total, assets.length);
   _renderTimeline();
   _renderDistribution(assets);
   _renderGrid(assets);
@@ -7709,7 +8531,7 @@ function _wireControls2() {
     if (e.target.id === "assetDetailOverlay") _closeAssetDetail();
   });
 }
-function _renderHero2(total, count) {
+function _renderHero(total, count) {
   const valEl = document.getElementById("totalAssetVal");
   const subEl = document.getElementById("totalAssetSub");
   if (valEl) valEl.textContent = `\xA5${fmt(total)}`;
