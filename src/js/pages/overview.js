@@ -80,14 +80,14 @@ function _buildDateRange() {
       weekStart.setDate(thisMonday.getDate() + _weekOffset * 7);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 7);
+      const weekLastDay = new Date(weekEnd);
+      weekLastDay.setDate(weekEnd.getDate() - 1);
       const isThisWeek = _weekOffset === 0;
-      // Week number calculation
-      const weekNum = _getISOWeekNumber(weekStart);
       return {
         start: weekStart, end: weekEnd,
         label: isThisWeek
           ? '本周'
-          : `${weekStart.getFullYear()}年第${weekNum}周`,
+          : `${weekStart.getMonth()+1}月${weekStart.getDate()}日-${weekLastDay.getMonth()+1}月${weekLastDay.getDate()}日`,
         canNext: _weekOffset < 0,
         canPrev: true,
       };
@@ -609,6 +609,23 @@ function _buildVertBarWithAvg(canvasId, labels, data, colors, avgValue, barColor
         borderSkipped: false,
       }],
     },
+    plugins: [{
+      id: 'barLabels',
+      afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+        meta.data.forEach((bar, i) => {
+          const v = chart.data.datasets[0].data[i];
+          if (v === 0) return;
+          const label = v >= 10000 ? `¥${(v/10000).toFixed(1)}万` : `¥${v.toLocaleString()}`;
+          ctx.fillStyle = '#2F54EB';
+          ctx.font = `bold ${chart.width < 400 ? 10 : 11}px -apple-system, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(label, bar.x, bar.y - 6);
+        });
+      }
+    }],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -617,18 +634,6 @@ function _buildVertBarWithAvg(canvasId, labels, data, colors, avgValue, barColor
         legend: { display: false },
         tooltip: {
           callbacks: { label: (c) => `  ¥${c.raw.toLocaleString('zh-CN')}` },
-        },
-        datalabels: {
-          display: true,
-          anchor: 'end',
-          align: 'top',
-          offset: 4,
-          color: '#2F54EB',
-          font: (ctx) => ({
-            size: ctx.chart.width < 400 ? 10 : 11,
-            weight: '700',
-          }),
-          formatter: _fmtBarLabel,
         },
         avgLinePlugin: { avgValue },
       },

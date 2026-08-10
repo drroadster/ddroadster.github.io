@@ -7618,12 +7618,13 @@ function _buildDateRange() {
       weekStart.setDate(thisMonday.getDate() + _weekOffset * 7);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekStart.getDate() + 7);
+      const weekLastDay = new Date(weekEnd);
+      weekLastDay.setDate(weekEnd.getDate() - 1);
       const isThisWeek = _weekOffset === 0;
-      const weekNum = _getISOWeekNumber(weekStart);
       return {
         start: weekStart,
         end: weekEnd,
-        label: isThisWeek ? "\u672C\u5468" : `${weekStart.getFullYear()}\u5E74\u7B2C${weekNum}\u5468`,
+        label: isThisWeek ? "\u672C\u5468" : `${weekStart.getMonth() + 1}\u6708${weekStart.getDate()}\u65E5-${weekLastDay.getMonth() + 1}\u6708${weekLastDay.getDate()}\u65E5`,
         canNext: _weekOffset < 0,
         canPrev: true
       };
@@ -7676,12 +7677,6 @@ function _buildDateRange() {
       };
     }
   }
-}
-function _getISOWeekNumber(d) {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  return Math.ceil(((date - yearStart) / 864e5 + 1) / 7);
 }
 function _getFilteredTxs(all) {
   const range = _buildDateRange();
@@ -8105,6 +8100,23 @@ function _buildVertBarWithAvg(canvasId, labels, data, colors, avgValue, barColor
         borderSkipped: false
       }]
     },
+    plugins: [{
+      id: "barLabels",
+      afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const meta = chart.getDatasetMeta(0);
+        meta.data.forEach((bar, i) => {
+          const v = chart.data.datasets[0].data[i];
+          if (v === 0) return;
+          const label = v >= 1e4 ? `\xA5${(v / 1e4).toFixed(1)}\u4E07` : `\xA5${v.toLocaleString()}`;
+          ctx.fillStyle = "#2F54EB";
+          ctx.font = `bold ${chart.width < 400 ? 10 : 11}px -apple-system, sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "bottom";
+          ctx.fillText(label, bar.x, bar.y - 6);
+        });
+      }
+    }],
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -8113,18 +8125,6 @@ function _buildVertBarWithAvg(canvasId, labels, data, colors, avgValue, barColor
         legend: { display: false },
         tooltip: {
           callbacks: { label: (c) => `  \xA5${c.raw.toLocaleString("zh-CN")}` }
-        },
-        datalabels: {
-          display: true,
-          anchor: "end",
-          align: "top",
-          offset: 4,
-          color: "#2F54EB",
-          font: (ctx) => ({
-            size: ctx.chart.width < 400 ? 10 : 11,
-            weight: "700"
-          }),
-          formatter: _fmtBarLabel
         },
         avgLinePlugin: { avgValue }
       },
