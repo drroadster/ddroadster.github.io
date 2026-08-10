@@ -5,7 +5,8 @@
 // ═══════════════════════════════════════════════════════
 
 import { getAssets, upsertAsset, deleteAsset, getAssetHistory,
-         recordSnapshot, importAssetSnapshots, updateHistorySnapshot } from '../store.js';
+         recordSnapshot, importAssetSnapshots, updateHistorySnapshot,
+         updateSnapshotBreakdown } from '../store.js';
 import { subscribe } from '../store.js';
 import { buildLineChart, buildDoughnut, buildHorizBar, buildSparklineSvg,
          cssVar, palette } from '../charts.js';
@@ -36,6 +37,7 @@ function _normalizeCategory(cat) {
 
 let _timelineRange = 90; // days, 0 = all
 let _editingId = null;
+let _editingSnapshotTs = null;  // snapshot editor
 
 // ── Public init ──────────────────────────────────────
 export function initAssetsPage() {
@@ -101,6 +103,14 @@ function _wireControls() {
   document.getElementById('assetDetailClose')?.addEventListener('click', _closeAssetDetail);
   document.getElementById('assetDetailOverlay')?.addEventListener('click', (e) => {
     if (e.target.id === 'assetDetailOverlay') _closeAssetDetail();
+  });
+
+  // Snapshot editor overlay
+  document.getElementById('snapEditorClose')?.addEventListener('click', _closeSnapshotEditor);
+  document.getElementById('snapEditorCancel')?.addEventListener('click', _closeSnapshotEditor);
+  document.getElementById('snapEditorSave')?.addEventListener('click', _saveSnapshotEdit);
+  document.getElementById('snapshotEditorOverlay')?.addEventListener('click', (e) => {
+    if (e.target.id === 'snapshotEditorOverlay') _closeSnapshotEditor();
   });
 }
 
@@ -179,7 +189,15 @@ function _renderTimeline() {
 
   buildLineChart('assetTimelineChart', labels,
     [{ label: '总资产', data: totals, color: cssVar('--color-blue'), fill: true }],
-    { hideLegend: true });
+    { hideLegend: true,
+      onClick: (_event, elements) => {
+        if (!elements || elements.length === 0) return;
+        const idx = elements[0].index;
+        if (idx >= 0 && idx < hist.length) {
+          _showSnapshotEditor(hist[idx]);
+        }
+      },
+    });
 
   // Per-asset breakdown (only if 2+ assets have history)
   const allIds = [...new Set(hist.flatMap(h => Object.keys(h.breakdown || {})))];
@@ -441,6 +459,99 @@ function _saveAssetHistoryEdit(ts, asset, newValue) {
     showToast('已更新');
     _showAssetDetail(asset);
   }
+}
+
+// ── Snapshot editor (click chart data point) ──────────
+
+function _showSnapshotEditor(snapshot) {
+  _editingSnapshotTs = snapshot.ts;
+
+  const date = new Date(snapshot.ts);
+  const dateStr = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+
+  document.getElementById('snapEditorTitle').textContent = dateStr;
+  document.getElementById('snapEditorSubtitle').textContent = `总额 ¥${fmt(snapshot.total)}`;
+  document.getElementById('snapEditorSubtitle').classList.remove('total-updated');
+
+  _renderSnapshotSheet(snapshot);
+  document.getElementById('snapshotEditorOverlay').classList.add('open');
+}
+
+function _renderSnapshotSheet(snapshot) {
+  const listEl = document.getElementById('snapEditorList');
+  const breakdown = snapshot.breakdown || {};
+  const allAssets = getAssets();
+  const nameMap = Object.fromEntries(allAssets.map(a => [a.id, a.name]));
+
+  const entries = Object.entries(breakdown)
+    .sort(([, a], [, b]) => b - a);
+
+  if (!entries.length) {
+    listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--color-label-4);font-size:13px">该快照无资产明细</div>';
+    return;
+  }
+
+  listEl.innerHTML = entries.map(([id, val]) => {
+    const name = nameMap[id] || (id.length > 20 ? id.slice(0, 20) + '...' : id);
+    return `<div class="snapshot-editor-row">
+      <span class="snapshot-editor-row-name">${esc(name)}</span>
+      <input type="number" class="snapshot-editor-row-input" data-asset-id="${esc(id)}"
+             value="${val}" step="0.01" min="0">
+    </div>`;
+  }).join('');
+
+  // Bind input event for real-time total update
+  listEl.querySelectorAll('.snapshot-editor-row-input').forEach(input => {
+    input.addEventListener('input', _updateSnapshotTotal);
+  });
+}
+
+function _updateSnapshotTotal() {
+  const inputs = document.querySelectorAll('#snapEditorList .snapshot-editor-row-input');
+  let total = 0;
+  inputs.forEach(inp => {
+    total += parseFloat(inp.value) || 0;
+  });
+  const subEl = document.getElementById('snapEditorSubtitle');
+  subEl.textContent = `总额 ¥${fmt(total)}`;
+  subEl.classList.add('total-updated');
+  setTimeout(() => subEl.classList.remove('total-updated'), 800);
+}
+
+function _saveSnapshotEdit() {
+  if (!_editingSnapshotTs) return;
+
+  const inputs = document.querySelectorAll('#snapEditorList .snapshot-editor-row-input');
+  const newBreakdown = {};
+  inputs.forEach(inp => {
+    const id = inp.dataset.assetId;
+    const val = parseFloat(inp.value);
+    if (id && !isNaN(val) && val >= 0) {
+      newBreakdown[id] = val;
+    }
+  });
+
+  if (Object.keys(newBreakdown).length === 0) {
+    showToast('没有可保存的资产数据');
+    return;
+  }
+
+  const ok = updateSnapshotBreakdown(_editingSnapshotTs, newBreakdown);
+  if (ok) {
+    showToast('快照已更新');
+  }
+
+  _closeSnapshotEditor();
+  _renderTimeline();
+  _renderHero(
+    getAssets().reduce((s, a) => s + (Number(a.value) || 0), 0),
+    getAssets().filter(a => a.deleted !== true).length
+  );
+}
+
+function _closeSnapshotEditor() {
+  document.getElementById('snapshotEditorOverlay').classList.remove('open');
+  _editingSnapshotTs = null;
 }
 
 // ── CSV import (multi-asset snapshot format) ──────────

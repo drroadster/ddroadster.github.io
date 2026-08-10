@@ -959,6 +959,25 @@
           <div class="asset-detail-list" id="assetDetailList"></div>
         </div>
       </div>
+
+      <!-- Snapshot editor sheet (click chart data point) -->
+      <div class="sheet-overlay" id="snapshotEditorOverlay">
+        <div class="sheet snapshot-editor-sheet">
+          <div class="sheet-handle"></div>
+          <div class="snapshot-editor-header">
+            <div>
+              <div class="snapshot-editor-title" id="snapEditorTitle">--</div>
+              <div class="snapshot-editor-subtitle" id="snapEditorSubtitle">总额 ¥0</div>
+            </div>
+            <button class="asset-detail-close" id="snapEditorClose" aria-label="关闭">✕</button>
+          </div>
+          <div class="snapshot-editor-list" id="snapEditorList"></div>
+          <div class="snapshot-editor-actions">
+            <button class="btn btn-cancel" id="snapEditorCancel">取消</button>
+            <button class="btn btn-primary btn-save" id="snapEditorSave">保存</button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ════════════════ PAGE: ANALYSIS ════════════════ -->

@@ -2378,6 +2378,173 @@ body::after {
   cursor: pointer;
 }
 
+/* ── Snapshot editor sheet ──────────────────────────── */
+.snapshot-editor-sheet {
+  max-width: 520px;
+  width: 100%;
+  background: var(--color-surface-solid);
+  border-radius: 16px 16px 0 0;
+  padding: 0 0 calc(16px + env(safe-area-inset-bottom, 0px)) 0;
+}
+
+.snapshot-editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 24px 14px;
+  border-bottom: 1px solid var(--color-sep);
+}
+
+.snapshot-editor-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-label-1);
+  letter-spacing: -0.01em;
+}
+
+.snapshot-editor-subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-label-3);
+  margin-top: 4px;
+  transition: color 0.25s;
+}
+
+.snapshot-editor-subtitle.total-updated {
+  color: var(--color-accent);
+}
+
+.snapshot-editor-list {
+  padding: 8px 24px;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.snapshot-editor-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-sep);
+}
+
+.snapshot-editor-row:last-child {
+  border-bottom: none;
+}
+
+.snapshot-editor-row-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-label-2);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.snapshot-editor-row-input {
+  width: 140px;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  background: var(--glass-input);
+  border: 1.5px solid var(--glass-border-subtle);
+  border-radius: 10px;
+  color: var(--color-label-1);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+
+.snapshot-editor-row-input:focus {
+  border-color: #2F54EB;
+  box-shadow: 0 0 0 3px rgba(47, 84, 235, 0.15);
+}
+
+.snapshot-editor-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 0;
+}
+
+.snapshot-editor-actions .btn {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  text-align: center;
+}
+
+.snapshot-editor-actions .btn:active {
+  transform: scale(0.97);
+}
+
+.snapshot-editor-actions .btn-cancel {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.snapshot-editor-actions .btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.snapshot-editor-actions .btn-save {
+  background: #2F54EB;
+  color: #fff;
+}
+
+.snapshot-editor-actions .btn-save:hover {
+  background: #1d3fd4;
+}
+
+/* ── Dark mode snapshot editor ── */
+[data-theme="dark"] .snapshot-editor-sheet {
+  background: #1a1d2e;
+}
+
+[data-theme="dark"] .snapshot-editor-header {
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+
+[data-theme="dark"] .snapshot-editor-row {
+  border-bottom-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .snapshot-editor-row-input {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .snapshot-editor-row-input:focus {
+  border-color: #5b7fff;
+  box-shadow: 0 0 0 3px rgba(91, 127, 255, 0.2);
+}
+
+[data-theme="dark"] .snapshot-editor-actions .btn-cancel {
+  background: rgba(255,255,255,0.08);
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .snapshot-editor-actions .btn-cancel:hover {
+  background: rgba(255,255,255,0.14);
+}
+
+[data-theme="dark"] .snapshot-editor-actions .btn-save {
+  background: #5b7fff;
+}
+
+[data-theme="dark"] .snapshot-editor-actions .btn-save:hover {
+  background: #4a6ee0;
+}
+
 
 /* ── src/css/charts.css ── */
 /* ================================================================
@@ -3125,6 +3292,25 @@ body::after {
             <button class="asset-detail-close" id="assetDetailClose" aria-label="关闭">✕</button>
           </div>
           <div class="asset-detail-list" id="assetDetailList"></div>
+        </div>
+      </div>
+
+      <!-- Snapshot editor sheet (click chart data point) -->
+      <div class="sheet-overlay" id="snapshotEditorOverlay">
+        <div class="sheet snapshot-editor-sheet">
+          <div class="sheet-handle"></div>
+          <div class="snapshot-editor-header">
+            <div>
+              <div class="snapshot-editor-title" id="snapEditorTitle">--</div>
+              <div class="snapshot-editor-subtitle" id="snapEditorSubtitle">总额 ¥0</div>
+            </div>
+            <button class="asset-detail-close" id="snapEditorClose" aria-label="关闭">✕</button>
+          </div>
+          <div class="snapshot-editor-list" id="snapEditorList"></div>
+          <div class="snapshot-editor-actions">
+            <button class="btn btn-cancel" id="snapEditorCancel">取消</button>
+            <button class="btn btn-primary btn-save" id="snapEditorSave">保存</button>
+          </div>
         </div>
       </div>
     </section>
@@ -4652,6 +4838,19 @@ function updateHistorySnapshot(ts, assetId, newValue) {
   _emit("assets");
   return true;
 }
+function updateSnapshotBreakdown(ts, newBreakdown) {
+  const idx = _history.findIndex((h) => h.ts === ts);
+  if (idx === -1) return false;
+  _history[idx].breakdown = newBreakdown;
+  _history[idx].total = Object.values(newBreakdown).reduce((s, v) => s + (Number(v) || 0), 0);
+  _persist(LS.ASSET_HISTORY, _history);
+  _emit("history");
+  _emit("assets");
+  if (_syncAdapter && _syncAdapter.writeAssetHistory) {
+    _syncAdapter.writeAssetHistory(_history).catch((e) => console.warn("[store] \u5FEB\u7167\u7F16\u8F91\u4E91\u7AEF\u540C\u6B65\u5931\u8D25:", e));
+  }
+  return true;
+}
 function getTransactions() {
   return [..._transactions].filter((t2) => t2.deleted !== true).sort((a, b) => new Date(b.date) - new Date(a.date));
 }
@@ -4957,26 +5156,30 @@ function buildLineChart(canvasId, labels, datasets, opts = {}) {
     pointBorderWidth: 2,
     borderDash: d.dash ?? []
   }));
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: opts.hideLegend ? { display: false } : _legendDefaults(),
+      tooltip: { callbacks: { label: (c) => `  \xA5${_fmt(c.raw)}` } },
+      datalabels: { display: false }
+    },
+    scales: {
+      x: { ...axDef.x, ...opts.xTicks ?? {} },
+      y: {
+        ...axDef.y,
+        ticks: { ...axDef.y.ticks, callback: (v) => "\xA5" + _fmtK(v) }
+      }
+    }
+  };
+  if (opts.onClick) {
+    options.onClick = opts.onClick;
+  }
   return _save(canvasId, new Chart(ctx, {
     type: "line",
     data: { labels, datasets: chartDatasets },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: "index", intersect: false },
-      plugins: {
-        legend: opts.hideLegend ? { display: false } : _legendDefaults(),
-        tooltip: { callbacks: { label: (c) => `  \xA5${_fmt(c.raw)}` } },
-        datalabels: { display: false }
-      },
-      scales: {
-        x: { ...axDef.x, ...opts.xTicks ?? {} },
-        y: {
-          ...axDef.y,
-          ticks: { ...axDef.y.ticks, callback: (v) => "\xA5" + _fmtK(v) }
-        }
-      }
-    }
+    options
   }));
 }
 function buildDoughnut(canvasId, labels, data, legendId, opts = {}) {
@@ -8479,6 +8682,7 @@ function _normalizeCategory(cat) {
 }
 var _timelineRange = 90;
 var _editingId = null;
+var _editingSnapshotTs = null;
 function initAssetsPage() {
   _wireControls2();
   window.__rdstr_openAssetModal = () => openAssetModal();
@@ -8529,6 +8733,12 @@ function _wireControls2() {
   document.getElementById("assetDetailClose")?.addEventListener("click", _closeAssetDetail);
   document.getElementById("assetDetailOverlay")?.addEventListener("click", (e) => {
     if (e.target.id === "assetDetailOverlay") _closeAssetDetail();
+  });
+  document.getElementById("snapEditorClose")?.addEventListener("click", _closeSnapshotEditor);
+  document.getElementById("snapEditorCancel")?.addEventListener("click", _closeSnapshotEditor);
+  document.getElementById("snapEditorSave")?.addEventListener("click", _saveSnapshotEdit);
+  document.getElementById("snapshotEditorOverlay")?.addEventListener("click", (e) => {
+    if (e.target.id === "snapshotEditorOverlay") _closeSnapshotEditor();
   });
 }
 function _renderHero(total, count) {
@@ -8601,7 +8811,16 @@ function _renderTimeline() {
     "assetTimelineChart",
     labels,
     [{ label: "\u603B\u8D44\u4EA7", data: totals, color: cssVar("--color-blue"), fill: true }],
-    { hideLegend: true }
+    {
+      hideLegend: true,
+      onClick: (_event, elements) => {
+        if (!elements || elements.length === 0) return;
+        const idx = elements[0].index;
+        if (idx >= 0 && idx < hist.length) {
+          _showSnapshotEditor(hist[idx]);
+        }
+      }
+    }
   );
   const allIds = [...new Set(hist.flatMap((h) => Object.keys(h.breakdown || {})))];
   const allAssets = getAssets().filter((a) => a.deleted !== true);
@@ -8829,6 +9048,79 @@ function _saveAssetHistoryEdit(ts, asset, newValue) {
     showToast("\u5DF2\u66F4\u65B0");
     _showAssetDetail(asset);
   }
+}
+function _showSnapshotEditor(snapshot) {
+  _editingSnapshotTs = snapshot.ts;
+  const date = new Date(snapshot.ts);
+  const dateStr = `${date.getFullYear()}\u5E74${date.getMonth() + 1}\u6708${date.getDate()}\u65E5`;
+  document.getElementById("snapEditorTitle").textContent = dateStr;
+  document.getElementById("snapEditorSubtitle").textContent = `\u603B\u989D \xA5${fmt(snapshot.total)}`;
+  document.getElementById("snapEditorSubtitle").classList.remove("total-updated");
+  _renderSnapshotSheet(snapshot);
+  document.getElementById("snapshotEditorOverlay").classList.add("open");
+}
+function _renderSnapshotSheet(snapshot) {
+  const listEl = document.getElementById("snapEditorList");
+  const breakdown = snapshot.breakdown || {};
+  const allAssets = getAssets();
+  const nameMap = Object.fromEntries(allAssets.map((a) => [a.id, a.name]));
+  const entries = Object.entries(breakdown).sort(([, a], [, b]) => b - a);
+  if (!entries.length) {
+    listEl.innerHTML = '<div style="padding:20px;text-align:center;color:var(--color-label-4);font-size:13px">\u8BE5\u5FEB\u7167\u65E0\u8D44\u4EA7\u660E\u7EC6</div>';
+    return;
+  }
+  listEl.innerHTML = entries.map(([id, val]) => {
+    const name = nameMap[id] || (id.length > 20 ? id.slice(0, 20) + "..." : id);
+    return `<div class="snapshot-editor-row">
+      <span class="snapshot-editor-row-name">${esc(name)}</span>
+      <input type="number" class="snapshot-editor-row-input" data-asset-id="${esc(id)}"
+             value="${val}" step="0.01" min="0">
+    </div>`;
+  }).join("");
+  listEl.querySelectorAll(".snapshot-editor-row-input").forEach((input) => {
+    input.addEventListener("input", _updateSnapshotTotal);
+  });
+}
+function _updateSnapshotTotal() {
+  const inputs = document.querySelectorAll("#snapEditorList .snapshot-editor-row-input");
+  let total = 0;
+  inputs.forEach((inp) => {
+    total += parseFloat(inp.value) || 0;
+  });
+  const subEl = document.getElementById("snapEditorSubtitle");
+  subEl.textContent = `\u603B\u989D \xA5${fmt(total)}`;
+  subEl.classList.add("total-updated");
+  setTimeout(() => subEl.classList.remove("total-updated"), 800);
+}
+function _saveSnapshotEdit() {
+  if (!_editingSnapshotTs) return;
+  const inputs = document.querySelectorAll("#snapEditorList .snapshot-editor-row-input");
+  const newBreakdown = {};
+  inputs.forEach((inp) => {
+    const id = inp.dataset.assetId;
+    const val = parseFloat(inp.value);
+    if (id && !isNaN(val) && val >= 0) {
+      newBreakdown[id] = val;
+    }
+  });
+  if (Object.keys(newBreakdown).length === 0) {
+    showToast("\u6CA1\u6709\u53EF\u4FDD\u5B58\u7684\u8D44\u4EA7\u6570\u636E");
+    return;
+  }
+  const ok = updateSnapshotBreakdown(_editingSnapshotTs, newBreakdown);
+  if (ok) {
+    showToast("\u5FEB\u7167\u5DF2\u66F4\u65B0");
+  }
+  _closeSnapshotEditor();
+  _renderTimeline();
+  _renderHero(
+    getAssets().reduce((s, a) => s + (Number(a.value) || 0), 0),
+    getAssets().filter((a) => a.deleted !== true).length
+  );
+}
+function _closeSnapshotEditor() {
+  document.getElementById("snapshotEditorOverlay").classList.remove("open");
+  _editingSnapshotTs = null;
 }
 function _handleAssetCSV(e) {
   const file = e.target.files[0];

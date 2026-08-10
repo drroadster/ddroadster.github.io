@@ -1032,3 +1032,170 @@
 .bank-card {
   cursor: pointer;
 }
+
+/* ── Snapshot editor sheet ──────────────────────────── */
+.snapshot-editor-sheet {
+  max-width: 520px;
+  width: 100%;
+  background: var(--color-surface-solid);
+  border-radius: 16px 16px 0 0;
+  padding: 0 0 calc(16px + env(safe-area-inset-bottom, 0px)) 0;
+}
+
+.snapshot-editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 16px 24px 14px;
+  border-bottom: 1px solid var(--color-sep);
+}
+
+.snapshot-editor-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-label-1);
+  letter-spacing: -0.01em;
+}
+
+.snapshot-editor-subtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-label-3);
+  margin-top: 4px;
+  transition: color 0.25s;
+}
+
+.snapshot-editor-subtitle.total-updated {
+  color: var(--color-accent);
+}
+
+.snapshot-editor-list {
+  padding: 8px 24px;
+  max-height: 45vh;
+  overflow-y: auto;
+}
+
+.snapshot-editor-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-sep);
+}
+
+.snapshot-editor-row:last-child {
+  border-bottom: none;
+}
+
+.snapshot-editor-row-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-label-2);
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.snapshot-editor-row-input {
+  width: 140px;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  background: var(--glass-input);
+  border: 1.5px solid var(--glass-border-subtle);
+  border-radius: 10px;
+  color: var(--color-label-1);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  flex-shrink: 0;
+}
+
+.snapshot-editor-row-input:focus {
+  border-color: #2F54EB;
+  box-shadow: 0 0 0 3px rgba(47, 84, 235, 0.15);
+}
+
+.snapshot-editor-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px 24px 0;
+}
+
+.snapshot-editor-actions .btn {
+  flex: 1;
+  padding: 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  text-align: center;
+}
+
+.snapshot-editor-actions .btn:active {
+  transform: scale(0.97);
+}
+
+.snapshot-editor-actions .btn-cancel {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.snapshot-editor-actions .btn-cancel:hover {
+  background: #e2e8f0;
+}
+
+.snapshot-editor-actions .btn-save {
+  background: #2F54EB;
+  color: #fff;
+}
+
+.snapshot-editor-actions .btn-save:hover {
+  background: #1d3fd4;
+}
+
+/* ── Dark mode snapshot editor ── */
+[data-theme="dark"] .snapshot-editor-sheet {
+  background: #1a1d2e;
+}
+
+[data-theme="dark"] .snapshot-editor-header {
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+
+[data-theme="dark"] .snapshot-editor-row {
+  border-bottom-color: rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .snapshot-editor-row-input {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
+  color: #e2e8f0;
+}
+
+[data-theme="dark"] .snapshot-editor-row-input:focus {
+  border-color: #5b7fff;
+  box-shadow: 0 0 0 3px rgba(91, 127, 255, 0.2);
+}
+
+[data-theme="dark"] .snapshot-editor-actions .btn-cancel {
+  background: rgba(255,255,255,0.08);
+  color: #94a3b8;
+}
+
+[data-theme="dark"] .snapshot-editor-actions .btn-cancel:hover {
+  background: rgba(255,255,255,0.14);
+}
+
+[data-theme="dark"] .snapshot-editor-actions .btn-save {
+  background: #5b7fff;
+}
+
+[data-theme="dark"] .snapshot-editor-actions .btn-save:hover {
+  background: #4a6ee0;
+}

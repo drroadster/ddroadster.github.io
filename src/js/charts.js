@@ -126,26 +126,32 @@ export function buildLineChart(canvasId, labels, datasets, opts = {}) {
     borderDash:               d.dash ?? [],
   }));
 
+  const options = {
+    responsive:           true,
+    maintainAspectRatio:  false,
+    interaction:          { mode: 'index', intersect: false },
+    plugins: {
+      legend:     opts.hideLegend ? { display: false } : _legendDefaults(),
+      tooltip:    { callbacks: { label: c => `  ¥${_fmt(c.raw)}` } },
+      datalabels: { display: false },
+    },
+    scales: {
+      x: { ...axDef.x, ...(opts.xTicks ?? {}) },
+      y: {
+        ...axDef.y,
+        ticks: { ...axDef.y.ticks, callback: v => '¥' + _fmtK(v) },
+      },
+    },
+  };
+
+  if (opts.onClick) {
+    options.onClick = opts.onClick;
+  }
+
   return _save(canvasId, new Chart(ctx, {
     type: 'line',
     data: { labels, datasets: chartDatasets },
-    options: {
-      responsive:           true,
-      maintainAspectRatio:  false,
-      interaction:          { mode: 'index', intersect: false },
-      plugins: {
-        legend:     opts.hideLegend ? { display: false } : _legendDefaults(),
-        tooltip:    { callbacks: { label: c => `  ¥${_fmt(c.raw)}` } },
-        datalabels: { display: false },
-      },
-      scales: {
-        x: { ...axDef.x, ...(opts.xTicks ?? {}) },
-        y: {
-          ...axDef.y,
-          ticks: { ...axDef.y.ticks, callback: v => '¥' + _fmtK(v) },
-        },
-      },
-    },
+    options,
   }));
 }
 

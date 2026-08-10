@@ -805,6 +805,33 @@ export function updateHistorySnapshot(ts, assetId, newValue) {
   return true;
 }
 
+/**
+ * Replace an entire snapshot's breakdown and recalculate total.
+ * Also syncs to Firestore if logged in.
+ * @param {string} ts - ISO timestamp of the snapshot to update
+ * @param {Record<string, number>} newBreakdown
+ * @returns {boolean}
+ */
+export function updateSnapshotBreakdown(ts, newBreakdown) {
+  const idx = _history.findIndex(h => h.ts === ts);
+  if (idx === -1) return false;
+
+  _history[idx].breakdown = newBreakdown;
+  _history[idx].total = Object.values(newBreakdown).reduce((s, v) => s + (Number(v) || 0), 0);
+
+  _persist(LS.ASSET_HISTORY, _history);
+  _emit('history');
+  _emit('assets');
+
+  // Firestore sync
+  if (_syncAdapter && _syncAdapter.writeAssetHistory) {
+    _syncAdapter.writeAssetHistory(_history).catch(e =>
+      console.warn('[store] 快照编辑云端同步失败:', e));
+  }
+
+  return true;
+}
+
 // ═══════════════════════════════════════════════════════
 //  v2.0 兼容层（保持所有 Pages 不变）
 // ═══════════════════════════════════════════════════════
