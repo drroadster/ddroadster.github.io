@@ -144,6 +144,7 @@ export function clearSyncAdapter() {
 export function initStore() {
   _drafts   = _read(LS.DRAFTS);
   _history  = _read(LS.ASSET_HISTORY);
+  _dedupeAssetHistory(); // 启动时清理同日重复快照
 
   // 如果存在旧格式数据（rdstr_tx / rdstr_assets），迁移到 drafts
   _migrateOldDataToDrafts();
@@ -733,13 +734,38 @@ export function getAssetHistory() { return [..._history]; }
 export function mergeAssetHistoryFromCloud(cloudSnapshots) {
   if (!Array.isArray(cloudSnapshots) || cloudSnapshots.length === 0) return;
 
-  const localMap = new Map(_history.map(h => [h.ts, h]));
+  // 按日期（YYYY-MM-DD）去重合并，同一天保留云端最新
+  const merged = new Map(_history.map(h => [h.ts.slice(0, 10), h]));
   for (const s of cloudSnapshots) {
-    if (s.ts) localMap.set(s.ts, s);
+    if (s.ts) merged.set(s.ts.slice(0, 10), s);
   }
-  _history = [...localMap.values()].sort((a, b) => a.ts.localeCompare(b.ts));
+  _history = [...merged.values()].sort((a, b) => a.ts.localeCompare(b.ts));
+  _dedupeAssetHistory(); // 清理合并后可能残留的日期重复
   _persist(LS.ASSET_HISTORY, _history);
   _emit('history');
+}
+
+/**
+ * 清理历史快照中的同日重复数据（保留每天 ts 最新的一条）。
+ */
+function _dedupeAssetHistory() {
+  const seen = new Map();
+  let changed = false;
+  for (const s of _history) {
+    const day = (s.ts || '').slice(0, 10);
+    if (!day) continue;
+    if (seen.has(day)) {
+      const prev = seen.get(day);
+      if (s.ts > prev.ts) seen.set(day, s);
+      changed = true;
+    } else {
+      seen.set(day, s);
+    }
+  }
+  if (changed) {
+    _history = [...seen.values()].sort((a, b) => a.ts.localeCompare(b.ts));
+    console.log(`[store] 已清理同日重复快照，去重后共 ${_history.length} 条`);
+  }
 }
 
 export function recordSnapshot() {
@@ -813,7 +839,11 @@ export function updateHistorySnapshot(ts, assetId, newValue) {
  * @returns {boolean}
  */
 export function updateSnapshotBreakdown(ts, newBreakdown) {
-  const idx = _history.findIndex(h => h.ts === ts);
+  let idx = _history.findIndex(h => h.ts === ts);
+  if (idx === -1) {
+    // 兜底：精确 ts 不匹配时按日期（YYYY-MM-DD）匹配
+    idx = _history.findIndex(h => h.ts.slice(0, 10) === ts.slice(0, 10));
+  }
   if (idx === -1) return false;
 
   _history[idx].breakdown = newBreakdown;

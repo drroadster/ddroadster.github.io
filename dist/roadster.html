@@ -4372,6 +4372,7 @@ function clearSyncAdapter() {
 function initStore() {
   _drafts = _read(LS.DRAFTS);
   _history = _read(LS.ASSET_HISTORY);
+  _dedupeAssetHistory();
   _migrateOldDataToDrafts();
   _transactions = [..._drafts];
   _assetDrafts = _read(LS.ASSETS_DRAFTS);
@@ -4780,13 +4781,33 @@ function getAssetHistory() {
 }
 function mergeAssetHistoryFromCloud(cloudSnapshots) {
   if (!Array.isArray(cloudSnapshots) || cloudSnapshots.length === 0) return;
-  const localMap = new Map(_history.map((h) => [h.ts, h]));
+  const merged = new Map(_history.map((h) => [h.ts.slice(0, 10), h]));
   for (const s of cloudSnapshots) {
-    if (s.ts) localMap.set(s.ts, s);
+    if (s.ts) merged.set(s.ts.slice(0, 10), s);
   }
-  _history = [...localMap.values()].sort((a, b) => a.ts.localeCompare(b.ts));
+  _history = [...merged.values()].sort((a, b) => a.ts.localeCompare(b.ts));
+  _dedupeAssetHistory();
   _persist(LS.ASSET_HISTORY, _history);
   _emit("history");
+}
+function _dedupeAssetHistory() {
+  const seen = /* @__PURE__ */ new Map();
+  let changed = false;
+  for (const s of _history) {
+    const day = (s.ts || "").slice(0, 10);
+    if (!day) continue;
+    if (seen.has(day)) {
+      const prev = seen.get(day);
+      if (s.ts > prev.ts) seen.set(day, s);
+      changed = true;
+    } else {
+      seen.set(day, s);
+    }
+  }
+  if (changed) {
+    _history = [...seen.values()].sort((a, b) => a.ts.localeCompare(b.ts));
+    console.log(`[store] \u5DF2\u6E05\u7406\u540C\u65E5\u91CD\u590D\u5FEB\u7167\uFF0C\u53BB\u91CD\u540E\u5171 ${_history.length} \u6761`);
+  }
 }
 function recordSnapshot() {
   const total = _assets.filter((a) => !a.deleted).reduce((s, a) => s + (Number(a.value) || 0), 0);
@@ -4839,7 +4860,10 @@ function updateHistorySnapshot(ts, assetId, newValue) {
   return true;
 }
 function updateSnapshotBreakdown(ts, newBreakdown) {
-  const idx = _history.findIndex((h) => h.ts === ts);
+  let idx = _history.findIndex((h) => h.ts === ts);
+  if (idx === -1) {
+    idx = _history.findIndex((h) => h.ts.slice(0, 10) === ts.slice(0, 10));
+  }
   if (idx === -1) return false;
   _history[idx].breakdown = newBreakdown;
   _history[idx].total = Object.values(newBreakdown).reduce((s, v) => s + (Number(v) || 0), 0);
